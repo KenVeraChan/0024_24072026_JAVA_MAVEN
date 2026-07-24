@@ -1,0 +1,29 @@
+# === Eclipse / IDE ===
+.classpath
+.project
+.settings/
+
+# === Maven ===
+target/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+
+# === Dependencias externas (NO subir JARs) ===
+*.jar
+libs/
+
+# === Archivos generados por Java ===
+ficherosGenerados/
+
+# === Logs y temporales ===
+*.log
+*.tmp
+*.bak
+
+# === Sistema operativo ===
+.DS_Store
+Thumbs.db
+
