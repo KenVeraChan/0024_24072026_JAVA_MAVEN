@@ -4,8 +4,11 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
@@ -19,10 +22,10 @@ public class CargaRecursos {
 	private int edad=0;
 	private String profesion="";
 	private int seleccionador=0;
-	private String nombreFichero="";   //NOMBRE PARA CUALQUIER FICHERO
-	private String formatoFichero="";    //TIPO PARA EXCEL
-	private String rutaExcel="";
-	private List<String> datos= new ArrayList<>();
+	private List<String> alumnos= new ArrayList<>();
+	private List<String> cursos= new ArrayList<>();
+	private List<String> asignaturas = new ArrayList<>();
+	private List<String> temarios = new ArrayList<>();
 	
 	public CargaRecursos(){}
 	public void cargaMenu()
@@ -30,9 +33,21 @@ public class CargaRecursos {
 		//Carga el menu antes de seguir
 		InterfazUsuario nuevoFondo= new InterfazUsuario();
 	}
-	public List<String> getDatos()
+	public List<String> getAlumnos()
 	{
-		return this.datos;
+		return this.alumnos;
+	}
+	public List<String> getCursos()
+	{
+		return this.cursos;
+	}
+	public List<String> getAsignaturas()
+	{
+		return this.asignaturas;
+	}
+	public List<String> getTemarios()
+	{
+		return this.temarios;
 	}
 	public void setNombre(String nombre)
 	{
@@ -68,51 +83,42 @@ public class CargaRecursos {
 	}
 	public void generadorFichero(int selector)
 	{
+		File file = new File("ficherosGenerados/examen.xlsx");    //getResourceAsStream() para lectura solo de ficheros
+
 		switch(selector)
 		{
 			case 1: //ESCRIBIR EN FICHERO EXCEL
-			{
-		        try {
-		        	
-		            Workbook libro = new XSSFWorkbook(); // archivo .xlsx
-		            Sheet hoja = libro.createSheet("Datos");
-
-		            Row fila = hoja.createRow(0);        // fila 0
-		            Cell celda = fila.createCell(0);     // columna 0
-		            celda.setCellValue(123.45);          // n�mero en la celda
-
-		            if(new File(new gestionFicheros().getRuta()+this.nombreFichero+this.formatoFichero).exists())
-		            {
-		            	//NO HACE NADA PORQUE YA ESTÁ CREADO
-			            System.out.println("Excel no creado por existir");
-		            }
-		            else
-		            {
-		            	FileOutputStream archivo= new FileOutputStream(new File(new gestionFicheros().getRuta()+this.nombreFichero+this.formatoFichero));
+			{		            
+				try {
+						InputStream ruta = new FileInputStream(file);
+			            Workbook libro = new XSSFWorkbook(ruta);    //Asignacion de ruta
+			            Sheet hoja = libro.createSheet("Datos");
+			            
+			            Row fila = hoja.createRow(0);        // fila 0
+			            Cell celda = fila.createCell(0);     // columna 0
+			            celda.setCellValue(123.45);          // n�mero en la celda
+		            	
+		            	FileOutputStream archivo= new FileOutputStream(file);
 			            libro.write(archivo);
 			            archivo.close();
 			            libro.close();
-			            System.out.println("Excel creado correctamente");	
-		            }             
+			            System.out.println("Excel editado correctamente");	            
 		        } catch (Exception e) {
-		            e.printStackTrace();
+		            //e.printStackTrace();
 		            System.out.println("El error ha sido: "+e.getMessage()+" y la causa: "+e.getCause());
+		            System.out.println("Se debera crear el fichero de EXCEL previamente");
 		        }
 				break;
 			}
 			case 2: //LEER DE UN FICHERO DE EXCEL DE PRUEBA
 			{
 				//DEFINIMOS LOS PARAMETROS DEL FICHERO
-				this.nombreFichero="ejemplo";
-				this.formatoFichero=".xlsx";
-				
-		        this.rutaExcel = new gestionFicheros().getRuta()+this.nombreFichero+this.formatoFichero;  // ruta del fichero
-
 		        List<String> datosColumna = new ArrayList<>();
-		        try (FileInputStream fis = new FileInputStream(this.rutaExcel);
-		             Workbook workbook = new XSSFWorkbook(fis)) {
+		        try (
+	        	 FileInputStream fis = new FileInputStream(file);
+	             Workbook workbook = new XSSFWorkbook(fis)) {
 
-		            Sheet hoja = workbook.getSheetAt(0); // primera hoja del Excel
+		            Sheet hoja = workbook.getSheetAt(1); // primera hoja del Excel
 
 		            for (Row fila : hoja) {
 		                Cell celda = fila.getCell(0); // primera columna (índice 0)
@@ -122,7 +128,8 @@ public class CargaRecursos {
 		                }
 		            }
 		        } catch (IOException e) {
-		            e.printStackTrace();
+		            //e.printStackTrace();
+		            System.out.println("El error ha sido: "+e.getMessage()+" y la causa: "+e.getCause());
 		        }
 
 		        // MOSTRAR RESULTADOS
@@ -134,58 +141,65 @@ public class CargaRecursos {
 			}
 			case 3: //CREA FICHERO DE TIPO TXT
 			{
-				gestionFicheros fichero= new gestionFicheros();
-				if(fichero.ficheroCreado("Facturas",".txt"))
+				File fileTXT = new File("ficherosGenerados/Facturas.txt");    //getResourceAsStream() para lectura solo de ficheros
+
+
+				if(!fileTXT.exists())
 				{
+					try {
+						fileTXT.createNewFile();
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+			            //e.printStackTrace();
+			            System.out.println("El error de creacion del fichero TXT ha sido: "+e.getMessage()+" y la causa: "+e.getCause());
+					}
 					System.out.println("Fichero creado correctamente");
 				}
 				else 
 				{
-					System.out.println("Error de creacion de fichero");
+					System.out.println("Fichero ya estaba creado");
 				}
 				break;
 			}
 			case 4: //LEER DE UN FICHERO DE EXCEL DEL MOTIVADO PROYECTO
 			{
-				//DEFINIMOS LOS PARAMETROS DEL FICHERO
-				this.nombreFichero="Alumnos Arces 3 Formación";
-				this.formatoFichero=".xlsm";
-				
-		        this.rutaExcel = new gestionFicheros().getRuta()+this.nombreFichero+this.formatoFichero;  // ruta del fichero
+				Set<String> datosColumnaAlumnos = new HashSet<>();
+		        Set<String> datosColumnaCursos = new HashSet<>();
+		        Set<String> datosColumnaAsignaturas= new HashSet<>(); //COLUMNA 51 DEL FICHERO EXCEL DE LA HOJA "ALUMNOS INFORMES" DESDE LA FILA 5
+		        Set<String> datosColumnaTemarios= new HashSet<>(); //COLUMNA 14 DEL FICHERO EXCEL DE LA HOJA "HOJA EXAMEN" DESDE LA FILA 2
 
-		        List<String> datosColumna = new ArrayList<>();
-
-		        try (FileInputStream fis = new FileInputStream(this.rutaExcel);
+		        try (
+		        		
+		        	 FileInputStream fis = new FileInputStream("ficherosUtilizados/AlumnosArces3Formacion.xlsm");
 		             Workbook workbook = new XSSFWorkbook(fis)) {
 
 		            Sheet hoja = workbook.getSheetAt(3); // cuarta hoja del Excel
-
-		            for (int i = 3; i <= hoja.getLastRowNum(); i++) {   // empieza en la fila 9
+		            for (int i = 3; i <= hoja.getLastRowNum(); i++) 
+		            {   // empieza en la fila 4 empezando a contar desde 0
 		                Row fila = hoja.getRow(i);
 
-		                if (fila == null) continue;   // si la fila está vacía, saltamos
-		                Cell celda = fila.getCell(1); // segunda columna (índice 1)
+		                if (fila==null) continue;   // si la fila está vacía, saltamos
+		                Cell celdaAsignatura= fila.getCell(50);  //Quincuagésimaprimera columna (indice50) la de las asignaturas
+		                Cell celdaTemario = fila.getCell(52); // Quincuagésimatercera columna (índice 52) la de los temarios
+		                Cell celdaCurso = fila.getCell(2);  // tercera columna (indice 2) la de los cursos
+		                Cell celdaAlumno = fila.getCell(1); // segunda columna (índice 1) la de los alumnos
 
-		                if (celda != null) {
-		                    datosColumna.add(celda.toString());
-		                }
+		                if(celdaAlumno != null){datosColumnaAlumnos.add(celdaAlumno.toString());}
+		                if(celdaCurso !=null){datosColumnaCursos.add(celdaCurso.toString());}
+		                if(celdaAsignatura!=null){datosColumnaAsignaturas.add(celdaAsignatura.toString());}
+		                if(celdaTemario!=null){datosColumnaTemarios.add(celdaTemario.toString());}
 		            }
-			        this.datos=datosColumna;  //Se actualiza aqui el ArrayList para usarse despues
-
-			        
-			        
-			        
-			        
-			        
-			        
-			        
+			        this.alumnos=new ArrayList<>(datosColumnaAlumnos);  //Se actualiza aqui el ArrayList de alumnos convertido de un Set para un List 
+			        this.cursos = new ArrayList<>(datosColumnaCursos); //Se actualiza aqui el ArrayList convertido de un Set para un List
+			        this.asignaturas= new ArrayList<>(datosColumnaAsignaturas); //Se actualiza aqui el ArrayList convertido de un Set para un List
+			        this.temarios= new ArrayList<>(datosColumnaTemarios); //Se actualiza aqui el ArrayList convertido de un Set para un List
 		        } catch (IOException e) {
-		            e.printStackTrace();
+		            //e.printStackTrace();
+		            System.out.println("El error ha sido: "+e.getMessage()+" y la causa: "+e.getCause());
 		        }
-
 		        // MOSTRAR RESULTADOS
 		        //System.out.println("Datos leídos de la primera columna:");
-		        //for (String dato : datosColumna) {
+		        //for (String dato : datosColumnaTemarios) {
 		        //    System.out.println(dato);
 		        //}
 				break;
@@ -199,6 +213,7 @@ public class CargaRecursos {
 				break;
 			}
 		}
+		System.out.println("SE HA CONTINUADO EL PROGRAMA HASTA AQUI SIN PROBLEMA");
 	}
 }
 

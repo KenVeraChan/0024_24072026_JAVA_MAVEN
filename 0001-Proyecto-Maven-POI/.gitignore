@@ -15,9 +15,6 @@ release.properties
 *.jar
 libs/
 
-# === Archivos generados por Java ===
-ficherosGenerados/
-
 # === Logs y temporales ===
 *.log
 *.tmp
