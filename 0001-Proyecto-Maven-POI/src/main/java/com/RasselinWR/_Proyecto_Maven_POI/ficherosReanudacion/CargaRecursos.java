@@ -104,8 +104,8 @@ public class CargaRecursos {
 			            libro.close();
 			            System.out.println("Excel editado correctamente");	            
 		        } catch (Exception e) {
-		            //e.printStackTrace();
-		            System.out.println("El error ha sido: "+e.getMessage()+" y la causa: "+e.getCause());
+		            e.printStackTrace();
+		            System.out.println("El error del caso 1 ha sido: "+e.getMessage()+" y la causa: "+e.getCause());
 		            System.out.println("Se debera crear el fichero de EXCEL previamente");
 		        }
 				break;
@@ -128,8 +128,8 @@ public class CargaRecursos {
 		                }
 		            }
 		        } catch (IOException e) {
-		            //e.printStackTrace();
-		            System.out.println("El error ha sido: "+e.getMessage()+" y la causa: "+e.getCause());
+		            e.printStackTrace();
+		            System.out.println("El error del caso 2 ha sido: "+e.getMessage()+" y la causa: "+e.getCause());
 		        }
 
 		        // MOSTRAR RESULTADOS
@@ -150,8 +150,8 @@ public class CargaRecursos {
 						fileTXT.createNewFile();
 					} catch (IOException e) {
 						// TODO Auto-generated catch block
-			            //e.printStackTrace();
-			            System.out.println("El error de creacion del fichero TXT ha sido: "+e.getMessage()+" y la causa: "+e.getCause());
+			            e.printStackTrace();
+			            System.out.println("El error de del caso 3 creacion del fichero TXT ha sido: "+e.getMessage()+" y la causa: "+e.getCause());
 					}
 					System.out.println("Fichero creado correctamente");
 				}
@@ -194,18 +194,9 @@ public class CargaRecursos {
 			        this.asignaturas= new ArrayList<>(datosColumnaAsignaturas); //Se actualiza aqui el ArrayList convertido de un Set para un List
 			        this.temarios= new ArrayList<>(datosColumnaTemarios); //Se actualiza aqui el ArrayList convertido de un Set para un List
 		        } catch (IOException e) {
-		            //e.printStackTrace();
-		            System.out.println("El error ha sido: "+e.getMessage()+" y la causa: "+e.getCause());
+		            e.printStackTrace();
+		            System.out.println("El error del caso 4 ha sido: "+e.getMessage()+" y la causa: "+e.getCause());
 		        }
-		        // MOSTRAR RESULTADOS
-		        //System.out.println("Datos leídos de la primera columna:");
-		        //for (String dato : datosColumnaTemarios) {
-		        //    System.out.println(dato);
-		        //}
-				break;
-			}
-			case 5:
-			{
 				break;
 			}
 			default:
@@ -213,7 +204,6 @@ public class CargaRecursos {
 				break;
 			}
 		}
-		System.out.println("SE HA CONTINUADO EL PROGRAMA HASTA AQUI SIN PROBLEMA");
 	}
 }
 
