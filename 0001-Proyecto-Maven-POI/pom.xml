@@ -29,12 +29,19 @@
   </dependencyManagement>
 
   <dependencies>
+    <!-- SwingX incluye JXDatePicker, que funciona igual que JDateChooser. -->
+    <dependency>
+        <groupId>org.swinglabs.swingx</groupId>
+        <artifactId>swingx-core</artifactId>
+        <version>1.6.5-1</version>
+    </dependency>
+
+    <!-- Optionally: parameterized tests support -->
     <dependency>
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter-api</artifactId>
       <scope>test</scope>
     </dependency>
-    <!-- Optionally: parameterized tests support -->
 
     <!-- Apache POI -->
     <dependency>

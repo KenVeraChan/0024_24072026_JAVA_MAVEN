@@ -9,12 +9,16 @@ import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.io.File;
 import java.net.URL;
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.jdesktop.swingx.JXDatePicker;
 
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
@@ -73,20 +77,32 @@ class laminaDispuesta extends JPanel implements ActionListener
 	//DECLARACION DE TITULOS DE BOTONES O DESPLEGABLES
 	private JLabel nombre= new JLabel("NOMBRE y APELLIDOS: ");
 	private JLabel curso= new JLabel("CURSO: ");
+	private JLabel fecha= new JLabel("FECHA: ");
 	private JLabel asignatura= new JLabel("ASIGNATURA: ");
 	private JLabel temario1= new JLabel("TEMARIO PREGUNTA 1: ");
 	private JLabel temario2= new JLabel("TEMARIO PREGUNTA 2: ");
 	private JLabel temario3= new JLabel("TEMARIO PREGUNTA 3: ");
 	private JLabel temario4= new JLabel("TEMARIO PREGUNTA 4: ");
 	private JLabel temario5= new JLabel("TEMARIO PREGUNTA 5: ");
+	private JLabel horarioExamen= new JLabel("HORA: ");
 	
 	//DECLARACION DE BOTONES Y ACCIONAMIENTOS
 	private JButton aceptar= new JButton("ACEPTAR");
 	private JButton cancelar= new JButton("CANCELAR");
 	
+	//DECLARACION DEL ACCIONAMIENTO FECHA
+	private JXDatePicker datePicker = new JXDatePicker();
+    private Date calendario;
+    
+    //DECLARACION DEL ACCIONAMIENTO HORA
+    private String[] horas = new String[48];
+    private int puntero=0;
+    JComboBox<String> horario;
+   
 	//Adapatabilidad de los formatos
 	private String cursoSeleccionado="";
 	private String asignaturaSeleccionada="";
+	private String horarioSeleccionado="";
 	private String nivel="";
 	private String materia="";
     private Image imagen;
@@ -99,7 +115,8 @@ class laminaDispuesta extends JPanel implements ActionListener
             Graphics2D g2 = (Graphics2D) g.create();
             g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, this.alfaImagen));
             g2.drawImage(imagen, 0, 0, getWidth(), getHeight(), this);
-            g2.dispose();        }
+            g2.dispose();
+        }
     }
 	public laminaDispuesta(CargaRecursos basedatos,String ruta,int transparencia)
 	{
@@ -176,7 +193,15 @@ class laminaDispuesta extends JPanel implements ActionListener
 		{
 			this.cajaAsignaturas.addItem(dato);   //Se rellena el COMBOOX
 		}
-		
+
+		//Rellenando el BOTON DE HORAS SWING
+	    for(int h = 0; h<24;h++) 
+	    {
+	        this.horas[puntero++] = String.format("%02d:00", h);
+	        this.horas[puntero++] = String.format("%02d:30", h);
+	    }
+	    this.horario = new JComboBox<>(horas);   //Se introducen todas las horas generadas en el combobox de horas
+
 		//Guardamos la seleccion inicial (primer elemento que muestra cada combo)
 		this.cursoSeleccionado = (String) this.cajaCursos.getSelectedItem();
 		this.asignaturaSeleccionada = (String) this.cajaAsignaturas.getSelectedItem();
@@ -184,15 +209,24 @@ class laminaDispuesta extends JPanel implements ActionListener
 		//UN CAMBIO EN ALGUNO DE AMBOS, MODIFICARÁ EL MENU DE TEMARIOS MOSTRADOS
 		this.cajaCursos.addItemListener(e -> {
 		    if (e.getStateChange() == ItemEvent.SELECTED) {
-		        this.cursoSeleccionado = (String) cajaCursos.getSelectedItem();
+		        this.cursoSeleccionado = (String) this.cajaCursos.getSelectedItem();
 		        System.out.println("Curso Seleccionado: " + this.cursoSeleccionado);
 		        actualizaMenu();
 		    }
 		});
 		this.cajaAsignaturas.addItemListener(e -> {
 		    if (e.getStateChange() == ItemEvent.SELECTED) {
-		        this.asignaturaSeleccionada = (String) cajaAsignaturas.getSelectedItem();
+		        this.asignaturaSeleccionada = (String) this.cajaAsignaturas.getSelectedItem();
 		        System.out.println("Asignatura Seleccionada: " + this.asignaturaSeleccionada);
+		        actualizaMenu();
+		    }
+		});
+		
+		//DETECTOR EN EL CAMBIO DE ELECCION DEL DESPLEGABLE DE LAS HORAS
+		this.horario.addItemListener(e -> {
+		    if (e.getStateChange() == ItemEvent.SELECTED) {
+		        this.horarioSeleccionado = (String) this.horario.getSelectedItem();
+		        System.out.println("Hora Seleccionada para examen: " + this.horarioSeleccionado);
 		        actualizaMenu();
 		    }
 		});
@@ -200,20 +234,51 @@ class laminaDispuesta extends JPanel implements ActionListener
 		//Primer volcado de temarios segun la seleccion inicial de curso y asignatura
 		actualizaMenu();
 		
+		//ESTETICA DE BOTON DE FECHA SWING
+		this.datePicker.setFormats("dd/MM/yyyy");
+		datePicker.addActionListener(e -> {
+		    this.calendario = datePicker.getDate();
+		    System.out.println(this.calendario);
+		});
+		
 		//ESTETICA DE BOTONES Y ACCIONAMIENTOS
 		this.aceptar.addActionListener(e->{
 			System.out.println("HOLA MUNDO LO HE ACEPTADO");
+			basedatos.generadorFichero(5);   //CREA EL EXCEL NECESARIO
+			gestionExamenExcel preparacion= new gestionExamenExcel();
+			preparacion.preparacionExamenExcel(
+					(String)this.cajaNombre.getSelectedItem(),
+					this.cursoSeleccionado,
+					this.asignaturaSeleccionada,
+					(String)this.cajaTemario1.getSelectedItem(),
+					(String)this.cajaTemario2.getSelectedItem(),
+					(String)this.cajaTemario3.getSelectedItem(),
+					(String)this.cajaTemario4.getSelectedItem(),
+					(String)this.cajaTemario5.getSelectedItem(),
+					this.calendario,
+					this.horarioSeleccionado);
 		});
 		this.cancelar.addActionListener(e->{
-			System.out.println("HOLA MUNDO LO HE CANCELADO");
+			System.exit(0);  //Sale del programa y termina
 		});
 		
-		//ESTETICA DE CAJAS-TITULOS-DESPLEGABLES
+		//ESTETICA DE CAJAS-TITULOS-DESPLEGABLES-FECHAS
 		setLayout(null);  //Para que respeten el setBounds
 		this.nombre.setBounds(20, 30, 450, 30);
 		this.cajaNombre.setBounds(20, 60, 450, 30);
+		
 		this.curso.setBounds(20, 90, 450, 30);
-		this.cajaCursos.setBounds(20, 120, 450, 30);
+		this.cajaCursos.setBounds(20, 120, 150, 30);
+		
+		this.fecha.setBounds(200, 90, 450, 30);
+		this.datePicker.setBounds(200, 120, 120, 30);
+		
+		this.horarioExamen.setBounds(350, 90, 100, 30);
+		this.horario.setBounds(350, 120, 80, 30);		
+		
+		this.fecha.setBounds(200, 90, 450, 30);
+		this.datePicker.setBounds(200, 120, 120, 30);
+		
 		this.asignatura.setBounds(20, 150, 450, 30);
 		this.cajaAsignaturas.setBounds(20, 180, 450, 30);
 		
@@ -254,6 +319,10 @@ class laminaDispuesta extends JPanel implements ActionListener
 		add(this.cajaTemario5);
 		add(this.aceptar);
 		add(this.cancelar);
+		add(this.fecha);
+		add(this.datePicker);
+		add(this.horario);
+		add(this.horarioExamen);
 	}
 
 	@Override
