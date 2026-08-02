@@ -17,7 +17,7 @@ import java.util.Set;
 
 import org.apache.poi.ss.usermodel.PageMargin;
 import org.apache.poi.ss.usermodel.Sheet;
-
+import org.apache.poi.ss.usermodel.BorderStyle;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.Font;
@@ -221,7 +221,6 @@ public class CargaRecursos {
 		        // 4. Crear celda
 		        Cell celda = fila.createCell(0); // columna 0
 		        // 5. Escribir valor
-		        celda.setCellValue("Hola Excel");
 
 		        try {
 		            // 6. Guardar en fichero
@@ -333,18 +332,19 @@ class gestionExamenExcel
 		this.formularioExamen.add("FECHA:");
 		this.formularioExamen.add("HORARIO");
 		this.formularioExamen.add("CORREO:");
+		this.formularioExamen.add("COMENTARIOS:");
 		
 		try {			
 			InputStream ruta = new FileInputStream(file);
             this.libro = new XSSFWorkbook(ruta);    //Asignacion de ruta
-            Sheet hoja = libro.getSheet("EXAMEN"); // Ir a la hoja de excel
+            Sheet hoja = this.libro.getSheet("EXAMEN"); // Ir a la hoja de excel
             CellStyle estilo;  //Generador de estilos para celdas
             Font fuente;	   //Generador de fuentes 
             int i=0;
             
             // Crear estilo con negrita
-            estilo = libro.createCellStyle();
-            fuente = libro.createFont();
+            estilo = this.libro.createCellStyle();
+            fuente = this.libro.createFont();
             fuente.setBold(true);
             estilo.setFont(fuente);
             hoja.setColumnWidth(0, 15 * 256);
@@ -362,7 +362,7 @@ class gestionExamenExcel
             }
 
             // RELLENANDO TEMARIOS COMPLETOS
-            for (i=0;i<10;i++)
+            for (i=0;i<11;i++)
             {
             	switch(i)
             	{
@@ -457,23 +457,59 @@ class gestionExamenExcel
             }
 
             // PALABRA CALIFICACIÓN (en el formulario procedimiento para darle estilos)
-	            // Crear estilo con negrita
-	            CellStyle estiloNegrita = libro.createCellStyle();
-	            Font fuenteNegrita = libro.createFont();
-	            fuenteNegrita.setBold(true);
-	            estiloNegrita.setFont(fuenteNegrita);
+	            // CREAR ESTILO FORMATO NEGRITA
+		            CellStyle estiloNegrita = this.libro.createCellStyle();
+		            Font fuenteNegrita = this.libro.createFont();
+		            fuenteNegrita.setBold(true);
+		            estiloNegrita.setFont(fuenteNegrita);
+		
+		            // Crear o recuperar la fila 0
+		            Row fila0 = hoja.getRow(0);
+		            if (fila0 == null) fila0 = hoja.createRow(0);
+		
+		            // Crear la celda y asignar texto
+		            Cell celdaCalificacion = fila0.createCell(5);
+		            celdaCalificacion.setCellValue("CALIFICACIÓN");
+		
+		            // Aplicar estilo en negrita
+		            celdaCalificacion.setCellStyle(estiloNegrita);
+	            
+		        // CREAR ESTILO CELDA BORDE FINO
+		            CellStyle estiloBordeFino = this.libro.createCellStyle();
 	
-	            // Crear o recuperar la fila 0
-	            Row fila0 = hoja.getRow(0);
-	            if (fila0 == null) fila0 = hoja.createRow(0);
+		            // Aplicar borde grueso
+		            estiloBordeFino.setBorderBottom(BorderStyle.THIN);
+
+		            //Celda de aplicacion del borde grueso
+			        for(int j=12;j<15;j++)
+			        {
+			            // Crear o recuperar la fila 12, 13 y 14
+			            Row filaFina = hoja.getRow(j);
+			            if (filaFina == null) filaFina = hoja.createRow(j);
+			            	for(i=1; i<8;i++)
+			            	{
+					            Cell celdaBorde = filaFina.createCell(i);
+					            celdaBorde.setCellStyle(estiloBordeFino);
+			            	}
+			        }
+		            
+	            // CREAR ESTILO CELDA BORDE GRUESO
+		            CellStyle estiloBordeGrueso = this.libro.createCellStyle();
 	
-	            // Crear la celda y asignar texto
-	            Cell celdaCalificacion = fila0.createCell(5);
-	            celdaCalificacion.setCellValue("CALIFICACIÓN");
+		            // Aplicar borde grueso
+		            estiloBordeGrueso.setBorderBottom(BorderStyle.THICK);
 	
-	            // Aplicar estilo en negrita
-	            celdaCalificacion.setCellStyle(estiloNegrita);
-            
+		            // Crear o recuperar la fila 16
+		            Row fila16 = hoja.getRow(16);
+		            if (fila16 == null) fila16 = hoja.createRow(16);
+		            
+		            //Celda de aplicacion del borde grueso
+		            for(i=0; i<8;i++)
+	            	{
+			            Cell celdaBorde = fila16.createCell(i);
+			            celdaBorde.setCellStyle(estiloBordeGrueso);
+	            	}
+
             estiloPagina();   //Se modifican los parametros de la hoja en referente a estilos
             
         	FileOutputStream archivo= new FileOutputStream(file);
