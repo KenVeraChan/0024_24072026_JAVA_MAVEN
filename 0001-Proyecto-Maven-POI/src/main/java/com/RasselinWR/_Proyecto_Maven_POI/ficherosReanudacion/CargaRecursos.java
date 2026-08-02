@@ -1,5 +1,7 @@
 package com.RasselinWR._Proyecto_Maven_POI.ficherosReanudacion;
 
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -7,13 +9,19 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
-
+import java.util.Deque;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+
+import javax.imageio.ImageIO;
 
 import org.apache.poi.ss.usermodel.PageMargin;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -494,7 +502,7 @@ class gestionExamenExcel
 	            	}
 	            	case 9:
 	            	{
-	            		String examenHora= "A las: "+horarioSeleccionado;
+	            		String examenHora= "A las: "+horarioSeleccionado+" horas";
 	                  Row fila = hoja.getRow(i);
 	                  if (fila == null) fila = hoja.createRow(i);	
 	                  fila.createCell(1).setCellValue(examenHora);
@@ -641,51 +649,105 @@ class gestionExamenExcel
 			System.out.println("AVISO: no se pudo acceder al logo en " + this.rutaUtilizados + "A3FLogo.jpg (se continua sin logo)");
 		}
 
-	//2) COLOCACION DE LAS IMAGENES DE CADA CARPETA DE CONTENIDO SELECCIONADO
-		int filaActual = 20;   //fila donde empieza a colocarse la primera imagen de contenido
+	//2) COLOCACION DE UNA IMAGEN ALEATORIA (SIN REPETIR) DEBAJO DE CADA "PREGUNTA 1..6"
+		//Filas donde estan las etiquetas PREGUNTA 1..6 (deben coincidir con preparacionExamenExcel):
+		//   PREGUNTA 1->18, 2->28, 3->38 (primera cara) y 4->50, 5->70, 6->90 (segunda cara)
+		int[] filasPreguntas = {18, 28, 38, 50, 70, 90};
+		int maxAnchoPx = 380;   //ancho maximo: poco mas de media pagina A4 en vertical (~660px utiles)
+
+		//Para cada carpeta de contenido preparamos una "baraja" de sus imagenes, para ir sacando
+		//una al azar y sin repetir. Varias PREGUNTAS de la misma carpeta comparten la misma baraja.
+		Map<String, Deque<File>> barajaPorCarpeta = new HashMap<>();
+		List<String> carpetasValidas = new ArrayList<>();   //respeta el orden y el numero de contenidos elegidos
 		for (String temario : temariosExamen)
 		{
 			if (temario == null || temario.trim().isEmpty())
 			{
 				continue;   //no hay contenido seleccionado en esa casilla
 			}
-			//Cada temario se corresponde con una carpeta con el mismo nombre dentro de ficherosUtilizados
-			File carpeta = new File(this.rutaUtilizados + temario);
-			if (!carpeta.exists() || !carpeta.isDirectory())
+			if (!barajaPorCarpeta.containsKey(temario))
 			{
-				System.out.println("AVISO: carpeta de contenido no encontrada -> " + carpeta.getPath());
-				continue;   //resolvemos el fallo de acceso saltando el contenido inexistente
-			}
-			//Recogemos SOLO los ficheros de imagen (jpg/jpeg/png) que haya dentro
-			File[] archivos = carpeta.listFiles(f -> f.isFile() && esImagen(f.getName()));
-			if (archivos == null || archivos.length == 0)
-			{
-				System.out.println("AVISO: la carpeta no contiene imagenes -> " + carpeta.getPath());
-				continue;   //carpeta vacia: se salta sin romper la ejecucion
-			}
-			//Ordenamos las imagenes por su numero (1.jpg, 2.jpg, ...) para respetar el orden
-			Arrays.sort(archivos, (a, b) -> Integer.compare(ordenImagen(a.getName()), ordenImagen(b.getName())));
-
-			for (File imagen : archivos)
-			{
-				byte[] bytesImagen = cargarBytesImagen(imagen.getPath());
-				if (bytesImagen == null)
+				//Cada temario se corresponde con una carpeta con el mismo nombre dentro de ficherosUtilizados
+				File carpeta = new File(this.rutaUtilizados + temario);
+				if (!carpeta.exists() || !carpeta.isDirectory())
 				{
-					continue;   //si una imagen concreta falla al leerse, se ignora y se sigue
+					System.out.println("AVISO: carpeta de contenido no encontrada -> " + carpeta.getPath());
+					continue;   //resolvemos el fallo de acceso saltando el contenido inexistente
 				}
-				int idxImagen = this.libro.addPicture(bytesImagen, tipoImagen(imagen.getName()));
-				ClientAnchor anclaImagen = helper.createClientAnchor();
-				anclaImagen.setCol1(0);              // ocupa el ancho util de la hoja
-				anclaImagen.setRow1(filaActual);
-				anclaImagen.setCol2(7);
-				anclaImagen.setRow2(filaActual + 8);
-				anclaImagen.setDx1(0);
-				anclaImagen.setDy1(0);
-				anclaImagen.setDx2(0);
-				anclaImagen.setDy2(0);
-				dibujo.createPicture(anclaImagen, idxImagen);
-				filaActual += 10;   //dejamos un hueco antes de la siguiente imagen
+				File[] archivos = carpeta.listFiles(f -> f.isFile() && esImagen(f.getName()));
+				if (archivos == null || archivos.length == 0)
+				{
+					System.out.println("AVISO: la carpeta no contiene imagenes -> " + carpeta.getPath());
+					continue;   //carpeta vacia: se salta sin romper la ejecucion
+				}
+				List<File> lista = new ArrayList<>(Arrays.asList(archivos));
+				Collections.shuffle(lista);   //orden aleatorio: sacaremos las imagenes de una en una sin repetir
+				barajaPorCarpeta.put(temario, new ArrayDeque<>(lista));
 			}
+			carpetasValidas.add(temario);
+		}
+
+		if (carpetasValidas.isEmpty())
+		{
+			System.out.println("AVISO: no hay ninguna carpeta con imagenes para las preguntas");
+			return;
+		}
+
+		//Recorremos las 6 preguntas y colocamos UNA imagen aleatoria debajo de cada etiqueta
+		for (int p = 0; p < filasPreguntas.length; p++)
+		{
+			//La pregunta p usa la carpeta correspondiente (se van rotando las carpetas disponibles)
+			String carpeta = carpetasValidas.get(p % carpetasValidas.size());
+			Deque<File> baraja = barajaPorCarpeta.get(carpeta);
+			//Si esa carpeta ya agoto sus imagenes, buscamos otra carpeta que aun tenga (para no repetir)
+			if (baraja == null || baraja.isEmpty())
+			{
+				baraja = null;
+				for (String c : carpetasValidas)
+				{
+					if (!barajaPorCarpeta.get(c).isEmpty())
+					{
+						baraja = barajaPorCarpeta.get(c);
+						break;
+					}
+				}
+				if (baraja == null)
+				{
+					break;   //no quedan imagenes sin usar en ninguna carpeta
+				}
+			}
+			File imagen = baraja.poll();   //imagen elegida al azar y que no se repetira
+			byte[] bytesImagen = cargarBytesImagen(imagen.getPath());
+			if (bytesImagen == null)
+			{
+				continue;   //si esa imagen falla al leerse, dejamos esa pregunta sin imagen
+			}
+
+			//Calculamos el tamaño respetando el ancho maximo (sin agrandar imagenes pequeñas)
+			int anchoPx = maxAnchoPx;
+			int altoPx = (int) Math.round(maxAnchoPx * 0.6);   //relacion por defecto si no se puede medir
+			int[] dim = dimensionesImagen(bytesImagen);
+			if (dim != null && dim[0] > 0 && dim[1] > 0)
+			{
+				double escala = Math.min(1.0, (double) maxAnchoPx / dim[0]);
+				anchoPx = (int) Math.round(dim[0] * escala);
+				altoPx = (int) Math.round(dim[1] * escala);
+			}
+
+			int fila = filasPreguntas[p] + 1;   //justo DEBAJO de la etiqueta de la pregunta
+			int idxImagen = this.libro.addPicture(bytesImagen, tipoImagen(imagen.getName()));
+			ClientAnchor anclaImagen = helper.createClientAnchor();
+			//Tamaño absoluto en pixeles, independiente del ancho de las columnas
+			anclaImagen.setAnchorType(ClientAnchor.AnchorType.MOVE_DONT_RESIZE);
+			anclaImagen.setCol1(0);
+			anclaImagen.setRow1(fila);
+			anclaImagen.setCol2(0);
+			anclaImagen.setRow2(fila);
+			anclaImagen.setDx1(0);
+			anclaImagen.setDy1(0);
+			anclaImagen.setDx2(Units.pixelToEMU(anchoPx));
+			anclaImagen.setDy2(Units.pixelToEMU(altoPx));
+			dibujo.createPicture(anclaImagen, idxImagen);
 		}
 	}
 
@@ -726,39 +788,21 @@ class gestionExamenExcel
 		return Workbook.PICTURE_TYPE_JPEG;   //jpg y jpeg
 	}
 
-	//Extrae el numero inicial del nombre (1.jpg -> 1) para poder ordenar las imagenes
-	private int ordenImagen(String nombre)
+	//Devuelve {ancho, alto} en pixeles de la imagen para poder escalarla; null si no se puede medir
+	private int[] dimensionesImagen(byte[] bytes)
 	{
-		String base = nombre;
-		int punto = base.lastIndexOf('.');
-		if (punto > 0)
-		{
-			base = base.substring(0, punto);
-		}
-		StringBuilder digitos = new StringBuilder();
-		for (int k = 0; k < base.length(); k++)
-		{
-			char c = base.charAt(k);
-			if (Character.isDigit(c))
-			{
-				digitos.append(c);
-			}
-			else if (digitos.length() > 0)
-			{
-				break;   //ya hemos leido el primer bloque de digitos
-			}
-		}
-		if (digitos.length() == 0)
-		{
-			return Integer.MAX_VALUE;   //sin numero: va al final
-		}
 		try
 		{
-			return Integer.parseInt(digitos.toString());
+			BufferedImage img = ImageIO.read(new ByteArrayInputStream(bytes));
+			if (img == null)
+			{
+				return null;
+			}
+			return new int[] { img.getWidth(), img.getHeight() };
 		}
-		catch (NumberFormatException e)
+		catch (IOException e)
 		{
-			return Integer.MAX_VALUE;
+			return null;
 		}
 	}
 

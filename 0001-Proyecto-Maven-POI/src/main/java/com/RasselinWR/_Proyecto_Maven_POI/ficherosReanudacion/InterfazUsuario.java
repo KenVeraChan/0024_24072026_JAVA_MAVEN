@@ -233,12 +233,20 @@ class laminaDispuesta extends JPanel implements ActionListener
 		//ESTETICA DE BOTON DE FECHA SWING
 		this.datePicker.setFormats("dd/MM/yyyy");
 		datePicker.addActionListener(e -> {
-		    this.calendario = datePicker.getDate();
+		    this.calendario = datePicker.getDate();  //Si no se ha elegido fecha se pone Hoy
 		});
 		
 		//ESTETICA DE BOTONES Y ACCIONAMIENTOS
 		this.aceptar.addActionListener(e->{
 			basedatos.generadorFichero(5);   //CREA EL EXCEL NECESARIO
+			    if(this.calendario== null)
+			    {
+			    	this.calendario= new Date();   //Aseguramiento de que haya FECHA pase lo que pase
+			    }
+			    if(this.horarioSeleccionado== null || this.horarioSeleccionado=="")
+			    {
+			    	this.horarioSeleccionado="16:00"; //Aseguramiento de que haya HORA pase lo que pase
+			    }
 			gestionExamenExcel preparacion= new gestionExamenExcel();
 			preparacion.preparacionExamenExcel(
 					(String)this.cajaNombre.getSelectedItem(),
