@@ -24,3 +24,6 @@ libs/
 .DS_Store
 Thumbs.db
 
+# === Ignora todas las carpetas del interior de ficheros utilizados
+ficherosUtilizados/*/
+

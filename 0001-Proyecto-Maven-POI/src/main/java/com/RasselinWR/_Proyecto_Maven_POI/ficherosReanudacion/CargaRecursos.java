@@ -5,10 +5,10 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 
 import java.util.HashSet;
@@ -20,12 +20,16 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.BorderStyle;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.ClientAnchor;
+import org.apache.poi.ss.usermodel.CreationHelper;
+import org.apache.poi.ss.usermodel.Drawing;
 import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.ss.usermodel.Footer;
 import org.apache.poi.ss.usermodel.Header;
 import org.apache.poi.ss.usermodel.PrintSetup;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.util.Units;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.jdesktop.swingx.JXDatePicker;
 
@@ -39,6 +43,8 @@ public class CargaRecursos {
 	private List<String> cursos= new ArrayList<>();
 	private List<String> asignaturas = new ArrayList<>();
 	private List<String> temarios = new ArrayList<>();
+	private String rutaGenerados="ficherosGenerados/examen.xlsx";
+	private String rutaUtilizados="ficherosUtilizados/AlumnosArces3Formacion.xlsm";
 	
 	public CargaRecursos(){}
 	public void cargaMenu()
@@ -96,7 +102,7 @@ public class CargaRecursos {
 	}
 	public void generadorFichero(int selector)
 	{
-		File file = new File("ficherosGenerados/examen.xlsx");    //getResourceAsStream() para lectura solo de ficheros
+		File file = new File(this.rutaGenerados);   //getResourceAsStream() para lectura solo de ficheros
 
 		switch(selector)
 		{
@@ -181,7 +187,7 @@ public class CargaRecursos {
 
 		        try (
 		        		
-		        	 FileInputStream fis = new FileInputStream("ficherosUtilizados/AlumnosArces3Formacion.xlsm");
+		        	 FileInputStream fis = new FileInputStream(this.rutaUtilizados);
 		             Workbook workbook = new XSSFWorkbook(fis)) {
 
 		            Sheet hoja = workbook.getSheetAt(3); // cuarta hoja del Excel
@@ -224,7 +230,7 @@ public class CargaRecursos {
 
 		        try {
 		            // 6. Guardar en fichero
-		            FileOutputStream archivo = new FileOutputStream("ficherosGenerados/examen.xlsx");
+		            FileOutputStream archivo = new FileOutputStream(this.rutaGenerados);
 		            libro.write(archivo);
 		            archivo.close();
 		            libro.close();
@@ -278,6 +284,8 @@ class gestionExamenExcel
 	private String temario4="";
 	private String temario5="";
 	private String horarioSeleccionado="";
+	private String rutaGenerados="ficherosGenerados/examen.xlsx";
+	private String rutaUtilizados="ficherosUtilizados/";
 	
 	//private Date fecha= new Date();   //Fecha de Java util
 	
@@ -287,7 +295,7 @@ class gestionExamenExcel
 	private Row fila;   //Determinacion de filas para el tratamiento de datos en un EXCEL
 	private Cell celda; //Determinacion de la celda para el tratamiento de datos en un EXCEL
 	
-	File file = new File("ficherosGenerados/examen.xlsx");    //getResourceAsStream() para lectura solo de ficheros
+	File file = new File(this.rutaGenerados);    //getResourceAsStream() para lectura solo de ficheros
 
 	private Date fecha;
 	
@@ -333,6 +341,12 @@ class gestionExamenExcel
 		this.formularioExamen.add("HORARIO");
 		this.formularioExamen.add("CORREO:");
 		this.formularioExamen.add("COMENTARIOS:");
+		this.formularioExamen.add("PREGUNTA 1:");
+		this.formularioExamen.add("PREGUNTA 2:");
+		this.formularioExamen.add("PREGUNTA 3:");
+		this.formularioExamen.add("PREGUNTA 4:");
+		this.formularioExamen.add("PREGUNTA 5:");
+		this.formularioExamen.add("PREGUNTA 6:");
 		
 		try {			
 			InputStream ruta = new FileInputStream(file);
@@ -353,12 +367,50 @@ class gestionExamenExcel
          // RELLENANDO EL FORMULARIO DEL EXAMEN
             for (String formulario : this.formularioExamen) 
             {
-                Row fila = hoja.getRow(i);
-                if (fila == null) fila = hoja.createRow(i);
-                Cell celda = fila.createCell(0);
-                celda.setCellValue(formulario);
-                celda.setCellStyle(estilo);
-                i++;
+            	if(i<=11)
+            	{
+                    Row fila = hoja.getRow(i);
+                    if (fila == null) fila = hoja.createRow(i);
+                    Cell celda = fila.createCell(0);
+                    celda.setCellValue(formulario);
+                    celda.setCellStyle(estilo);
+                    i++;
+            	}
+            	else if(i>11 && i<=14)  //Preguntas de la primera cara
+            	{
+                    Row fila = hoja.getRow(i);
+                    if (fila == null) fila = hoja.createRow(18+(i-12)*10);
+                    Cell celda = fila.createCell(0);
+                    
+                    // Crear estilo con negrita
+                    estilo = this.libro.createCellStyle();
+                    fuente = this.libro.createFont();
+                    fuente.setBold(true);
+                    fuente.setUnderline(Font.U_SINGLE);  // subrayado simple
+                    estilo.setFont(fuente);
+                    
+                    celda.setCellValue(formulario);
+                    celda.setCellStyle(estilo);
+                    celda.setCellStyle(estilo);
+                    i++;	
+            	}
+            	else if(i>14)  //Preguntas de la segunda cara
+            	{
+                    Row fila = hoja.getRow(i);
+                    if (fila == null) fila = hoja.createRow(50+(i-15)*20);
+                    Cell celda = fila.createCell(0);
+                    
+                    // Crear estilo con negrita
+                    estilo = this.libro.createCellStyle();
+                    fuente = this.libro.createFont();
+                    fuente.setBold(true);
+                    fuente.setUnderline(Font.U_SINGLE);  // subrayado simple
+                    estilo.setFont(fuente);
+                    
+                    celda.setCellValue(formulario);
+                    celda.setCellStyle(estilo);
+                    i++;
+            	}
             }
 
             // RELLENANDO TEMARIOS COMPLETOS
@@ -389,11 +441,12 @@ class gestionExamenExcel
 	            	}
 	            	case 3,4,5,6,7:
 	            	{
+	            		//Se colocaon los temarios quitando el curso y la asignatura previa
 	                    for (String casilla : this.temariosCompletos)
 	                    {
 	                       Row fila = hoja.getRow(i);
 	                	   if (fila == null) fila = hoja.createRow(i);	
-	                       fila.createCell(1).setCellValue(casilla.substring(19));
+	                       fila.createCell(1).setCellValue(sinPrefijo(casilla));
 	                      i++;
 	                    }
 	                    i--; //Factor correctivo porque por defecto suma una inidad mas a i y luego el bucle for añade otra unidad mas
@@ -437,7 +490,6 @@ class gestionExamenExcel
 	            	  Row fila = hoja.getRow(i);
 	                  if (fila == null) fila = hoja.createRow(i);	
 	                  fila.createCell(1).setCellValue(examen);
-	                  System.out.println("Siguiente Case es el: Case"+i);
 	            	 break;
 	            	}
 	            	case 9:
@@ -474,7 +526,7 @@ class gestionExamenExcel
 		            // Aplicar estilo en negrita
 		            celdaCalificacion.setCellStyle(estiloNegrita);
 	            
-		        // CREAR ESTILO CELDA BORDE FINO
+		        // CREAR ESTILO CELDA BORDE FINO PARA LOS COMENTARIOS
 		            CellStyle estiloBordeFino = this.libro.createCellStyle();
 	
 		            // Aplicar borde grueso
@@ -493,7 +545,7 @@ class gestionExamenExcel
 			            	}
 			        }
 		            
-	            // CREAR ESTILO CELDA BORDE GRUESO
+	            // CREAR ESTILO CELDA BORDE GRUESO PARA LA SEPARACION ENTRE EL EXAMEN Y EL FORMULARIO DEL EXAMEN
 		            CellStyle estiloBordeGrueso = this.libro.createCellStyle();
 	
 		            // Aplicar borde grueso
@@ -509,8 +561,12 @@ class gestionExamenExcel
 			            Cell celdaBorde = fila16.createCell(i);
 			            celdaBorde.setCellStyle(estiloBordeGrueso);
 	            	}
-
-            estiloPagina();   //Se modifican los parametros de la hoja en referente a estilos
+		    
+		    //Se modifican los parametros de la hoja en referente a estilos
+            estiloPagina();   
+            
+            //Se rellena el examen: LOGO + las preguntas insertadas como imagen
+            rellenarExamen(this.temariosCompletos); //Se rellena el examen: LOGO + las preguntas insertadas como imagen
             
         	FileOutputStream archivo= new FileOutputStream(file);
             libro.write(archivo);
@@ -551,5 +607,168 @@ class gestionExamenExcel
 		// Ajuste de escala
 		ps.setFitWidth((short)1);
 		ps.setFitHeight((short)1);
+	}
+	//SE INSERTAN EL LOGO Y LAS IMAGENES DE LOS CONTENIDOS ELEGIDOS DE LAS CARPETAS
+	public void rellenarExamen(List<String> temariosExamen)
+	{
+		//Definimos la hoja del libro EXCEL y un unico "dibujo" (patriarch) para toda la hoja
+		Sheet hoja = this.libro.getSheet("EXAMEN");
+		CreationHelper helper = this.libro.getCreationHelper();
+		Drawing<?> dibujo = hoja.createDrawingPatriarch();   //un solo patriarch: se reutiliza para todas las imagenes
+
+	//1) COLOCACION DE LOS LOGOS: el mismo logo en la esquina inferior derecha de cada una de las dos hojas/paginas
+		byte[] bytesLogo = cargarBytesImagen(this.rutaUtilizados + "A3FLogo.jpg");
+		if (bytesLogo != null)
+		{
+			int numeroLogos = 2;   //una copia del logo por cada pagina impresa
+			for (int i = 0; i < numeroLogos; i++)
+			{
+				int idxLogo = this.libro.addPicture(bytesLogo, Workbook.PICTURE_TYPE_JPEG);
+				ClientAnchor anclaLogo = helper.createClientAnchor();
+				anclaLogo.setCol1(6);            // columna inicial (parte derecha de la hoja)
+				anclaLogo.setRow1(47 + i * 50);  // fila inicial: pie de la pagina 1 y de la pagina 2
+				anclaLogo.setCol2(7);
+				anclaLogo.setRow2(49 + i * 50);
+				anclaLogo.setDx1(0);
+				anclaLogo.setDy1(0);
+				anclaLogo.setDx2(Units.toEMU(158));   // ancho en pixeles
+				anclaLogo.setDy2(Units.toEMU(65));     // alto en pixeles
+				dibujo.createPicture(anclaLogo, idxLogo);
+			}
+		}
+		else
+		{
+			System.out.println("AVISO: no se pudo acceder al logo en " + this.rutaUtilizados + "A3FLogo.jpg (se continua sin logo)");
+		}
+
+	//2) COLOCACION DE LAS IMAGENES DE CADA CARPETA DE CONTENIDO SELECCIONADO
+		int filaActual = 20;   //fila donde empieza a colocarse la primera imagen de contenido
+		for (String temario : temariosExamen)
+		{
+			if (temario == null || temario.trim().isEmpty())
+			{
+				continue;   //no hay contenido seleccionado en esa casilla
+			}
+			//Cada temario se corresponde con una carpeta con el mismo nombre dentro de ficherosUtilizados
+			File carpeta = new File(this.rutaUtilizados + temario);
+			if (!carpeta.exists() || !carpeta.isDirectory())
+			{
+				System.out.println("AVISO: carpeta de contenido no encontrada -> " + carpeta.getPath());
+				continue;   //resolvemos el fallo de acceso saltando el contenido inexistente
+			}
+			//Recogemos SOLO los ficheros de imagen (jpg/jpeg/png) que haya dentro
+			File[] archivos = carpeta.listFiles(f -> f.isFile() && esImagen(f.getName()));
+			if (archivos == null || archivos.length == 0)
+			{
+				System.out.println("AVISO: la carpeta no contiene imagenes -> " + carpeta.getPath());
+				continue;   //carpeta vacia: se salta sin romper la ejecucion
+			}
+			//Ordenamos las imagenes por su numero (1.jpg, 2.jpg, ...) para respetar el orden
+			Arrays.sort(archivos, (a, b) -> Integer.compare(ordenImagen(a.getName()), ordenImagen(b.getName())));
+
+			for (File imagen : archivos)
+			{
+				byte[] bytesImagen = cargarBytesImagen(imagen.getPath());
+				if (bytesImagen == null)
+				{
+					continue;   //si una imagen concreta falla al leerse, se ignora y se sigue
+				}
+				int idxImagen = this.libro.addPicture(bytesImagen, tipoImagen(imagen.getName()));
+				ClientAnchor anclaImagen = helper.createClientAnchor();
+				anclaImagen.setCol1(0);              // ocupa el ancho util de la hoja
+				anclaImagen.setRow1(filaActual);
+				anclaImagen.setCol2(7);
+				anclaImagen.setRow2(filaActual + 8);
+				anclaImagen.setDx1(0);
+				anclaImagen.setDy1(0);
+				anclaImagen.setDx2(0);
+				anclaImagen.setDy2(0);
+				dibujo.createPicture(anclaImagen, idxImagen);
+				filaActual += 10;   //dejamos un hueco antes de la siguiente imagen
+			}
+		}
+	}
+
+	//Lee de forma segura los bytes de una imagen; devuelve null si no se puede acceder a ella
+	private byte[] cargarBytesImagen(String ruta)
+	{
+		File fichero = new File(ruta);
+		if (!fichero.exists() || !fichero.isFile())
+		{
+			System.out.println("AVISO: imagen no accesible -> " + ruta);
+			return null;
+		}
+		try (InputStream entrada = new FileInputStream(fichero))
+		{
+			return entrada.readAllBytes();
+		}
+		catch (IOException e)
+		{
+			System.out.println("AVISO: fallo al leer la imagen -> " + ruta + " (" + e.getMessage() + ")");
+			return null;
+		}
+	}
+
+	//Indica si el nombre de fichero corresponde a un formato de imagen admitido
+	private boolean esImagen(String nombre)
+	{
+		String n = nombre.toLowerCase();
+		return n.endsWith(".jpg") || n.endsWith(".jpeg") || n.endsWith(".png");
+	}
+
+	//Traduce la extension del fichero al tipo de imagen que entiende Apache POI
+	private int tipoImagen(String nombre)
+	{
+		if (nombre.toLowerCase().endsWith(".png"))
+		{
+			return Workbook.PICTURE_TYPE_PNG;
+		}
+		return Workbook.PICTURE_TYPE_JPEG;   //jpg y jpeg
+	}
+
+	//Extrae el numero inicial del nombre (1.jpg -> 1) para poder ordenar las imagenes
+	private int ordenImagen(String nombre)
+	{
+		String base = nombre;
+		int punto = base.lastIndexOf('.');
+		if (punto > 0)
+		{
+			base = base.substring(0, punto);
+		}
+		StringBuilder digitos = new StringBuilder();
+		for (int k = 0; k < base.length(); k++)
+		{
+			char c = base.charAt(k);
+			if (Character.isDigit(c))
+			{
+				digitos.append(c);
+			}
+			else if (digitos.length() > 0)
+			{
+				break;   //ya hemos leido el primer bloque de digitos
+			}
+		}
+		if (digitos.length() == 0)
+		{
+			return Integer.MAX_VALUE;   //sin numero: va al final
+		}
+		try
+		{
+			return Integer.parseInt(digitos.toString());
+		}
+		catch (NumberFormatException e)
+		{
+			return Integer.MAX_VALUE;
+		}
+	}
+
+	//Quita el prefijo "NIVEL -CODIGO------ " del temario de forma segura (evita StringIndexOutOfBounds)
+	private String sinPrefijo(String temario)
+	{
+		if (temario == null)
+		{
+			return "";
+		}
+		return temario.length() > 19 ? temario.substring(19) : temario;
 	}
 }

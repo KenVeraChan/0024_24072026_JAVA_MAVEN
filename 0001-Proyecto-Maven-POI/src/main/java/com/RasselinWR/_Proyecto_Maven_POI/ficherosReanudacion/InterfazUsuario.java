@@ -9,8 +9,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.io.File;
 import java.net.URL;
-import java.text.SimpleDateFormat;
-import java.time.LocalDate;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -210,14 +209,12 @@ class laminaDispuesta extends JPanel implements ActionListener
 		this.cajaCursos.addItemListener(e -> {
 		    if (e.getStateChange() == ItemEvent.SELECTED) {
 		        this.cursoSeleccionado = (String) this.cajaCursos.getSelectedItem();
-		        System.out.println("Curso Seleccionado: " + this.cursoSeleccionado);
 		        actualizaMenu();
 		    }
 		});
 		this.cajaAsignaturas.addItemListener(e -> {
 		    if (e.getStateChange() == ItemEvent.SELECTED) {
 		        this.asignaturaSeleccionada = (String) this.cajaAsignaturas.getSelectedItem();
-		        System.out.println("Asignatura Seleccionada: " + this.asignaturaSeleccionada);
 		        actualizaMenu();
 		    }
 		});
@@ -226,7 +223,6 @@ class laminaDispuesta extends JPanel implements ActionListener
 		this.horario.addItemListener(e -> {
 		    if (e.getStateChange() == ItemEvent.SELECTED) {
 		        this.horarioSeleccionado = (String) this.horario.getSelectedItem();
-		        System.out.println("Hora Seleccionada para examen: " + this.horarioSeleccionado);
 		        actualizaMenu();
 		    }
 		});
@@ -238,12 +234,10 @@ class laminaDispuesta extends JPanel implements ActionListener
 		this.datePicker.setFormats("dd/MM/yyyy");
 		datePicker.addActionListener(e -> {
 		    this.calendario = datePicker.getDate();
-		    System.out.println(this.calendario);
 		});
 		
 		//ESTETICA DE BOTONES Y ACCIONAMIENTOS
 		this.aceptar.addActionListener(e->{
-			System.out.println("HOLA MUNDO LO HE ACEPTADO");
 			basedatos.generadorFichero(5);   //CREA EL EXCEL NECESARIO
 			gestionExamenExcel preparacion= new gestionExamenExcel();
 			preparacion.preparacionExamenExcel(
