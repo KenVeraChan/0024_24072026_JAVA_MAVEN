@@ -741,8 +741,8 @@ class gestionExamenExcel
 			anclaImagen.setAnchorType(ClientAnchor.AnchorType.MOVE_DONT_RESIZE);
 			anclaImagen.setCol1(0);
 			anclaImagen.setRow1(fila);
-			anclaImagen.setCol2(0);
-			anclaImagen.setRow2(fila);
+			anclaImagen.setCol2(5);  //Anchura de 5 celdas a la derecha por defecto para cualquier imagen
+			anclaImagen.setRow2(fila+5);  //Altura de 5 celdas hacia abajo para cualquier imagen 
 			anclaImagen.setDx1(0);
 			anclaImagen.setDy1(0);
 			anclaImagen.setDx2(Units.pixelToEMU(anchoPx));
