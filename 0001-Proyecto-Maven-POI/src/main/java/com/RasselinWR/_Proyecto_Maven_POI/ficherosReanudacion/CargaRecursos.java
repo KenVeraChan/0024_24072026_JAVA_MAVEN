@@ -22,6 +22,7 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.imageio.ImageIO;
+import javax.swing.JOptionPane;
 
 import org.apache.poi.ss.usermodel.PageMargin;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -235,7 +236,6 @@ public class CargaRecursos {
 		        // 4. Crear celda
 		        Cell celda = fila.createCell(0); // columna 0
 		        // 5. Escribir valor
-
 		        try {
 		            // 6. Guardar en fichero
 		            FileOutputStream archivo = new FileOutputStream(this.rutaGenerados);
@@ -247,6 +247,13 @@ public class CargaRecursos {
 		            e.printStackTrace();
 					System.out.println("FALLO DE GUARDADO DE FICHERO EN ESA URL");
 					System.out.println("Errores: "+e.getMessage()+" causados por: "+e.getCause());
+					int opcion = JOptionPane.showConfirmDialog(null, "Para continuar, CIÉRRELO y luego decida ¿Desea continuar?", "ADVERTENCIA: Fichero EXCEL abierto", JOptionPane.YES_NO_OPTION);
+
+					if (opcion == JOptionPane.YES_OPTION) {
+
+					} else {
+						System.exit(0);  //Sale del programa y termina
+					}
 		        }
 			}
 			default:
@@ -254,6 +261,10 @@ public class CargaRecursos {
 				break;
 			}
 		}
+	}
+	private void exit(int i) {
+		// TODO Auto-generated method stub
+		
 	}
 }
 
@@ -372,82 +383,142 @@ class gestionExamenExcel
             hoja.setColumnWidth(0, 15 * 256);
             hoja.setColumnWidth(7, 13 * 256);
             
-         // RELLENANDO EL FORMULARIO DEL EXAMEN
-            for (String formulario : this.formularioExamen) 
-            {
-            	if(i<=11)
-            	{
-                    Row fila = hoja.getRow(i);
-                    if (fila == null) fila = hoja.createRow(i);
-                    Cell celda = fila.createCell(0);
-                    celda.setCellValue(formulario);
-                    celda.setCellStyle(estilo);
-                    i++;
-            	}
-            	else if(i>11 && i<=14)  //Preguntas de la primera cara
-            	{
-                    Row fila = hoja.getRow(i);
-                    if (fila == null) fila = hoja.createRow(18+(i-12)*10);
-                    Cell celda = fila.createCell(0);
-                    
-                    // Crear estilo con negrita
-                    estilo = this.libro.createCellStyle();
-                    fuente = this.libro.createFont();
-                    fuente.setBold(true);
-                    fuente.setUnderline(Font.U_SINGLE);  // subrayado simple
-                    estilo.setFont(fuente);
-                    
-                    celda.setCellValue(formulario);
-                    celda.setCellStyle(estilo);
-                    celda.setCellStyle(estilo);
-                    i++;	
-            	}
-            	else if(i>14)  //Preguntas de la segunda cara
-            	{
-                    Row fila = hoja.getRow(i);
-                    if (fila == null) fila = hoja.createRow(50+(i-15)*20);
-                    Cell celda = fila.createCell(0);
-                    
-                    // Crear estilo con negrita
-                    estilo = this.libro.createCellStyle();
-                    fuente = this.libro.createFont();
-                    fuente.setBold(true);
-                    fuente.setUnderline(Font.U_SINGLE);  // subrayado simple
-                    estilo.setFont(fuente);
-                    
-                    celda.setCellValue(formulario);
-                    celda.setCellStyle(estilo);
-                    i++;
-            	}
-            }
+    // A) RELLENANDO EL FORMULARIO DEL EXAMEN
+	        if(this.asignatura.equals("Dibujo Técnico"))
+	        {
+	        	 //EN EL CASO DE QUE SI SEA DIBUJO TÉCNICO LA ASIGNATURA SELECCIONADA
+	            for (String formulario : this.formularioExamen) 
+	            {
+	            	//DATOS DEL FORMULARIO DEL ALUMNO - PRIMERA CARA PARA TODOS LOS EXAMENES
+	            	if(i<=11)
+	            	{
+	                    Row fila = hoja.getRow(i);
+	                    if (fila == null) fila = hoja.createRow(i);
+	                    Cell celda = fila.createCell(0);
+	                    celda.setCellValue(formulario);
+	                    celda.setCellStyle(estilo);
+	                    i++;
+	            	}
+	            	//PREGUNTAS DE LA PRIMERA CARA
+	        		else if(i==12)  
+	            	{
+	                    Row fila = hoja.getRow(i);
+	                    if (fila == null) fila = hoja.createRow(18);
+	                    Cell celda = fila.createCell(0);
+	                    
+	                    // Crear estilo con negrita
+	                    estilo = this.libro.createCellStyle();
+	                    fuente = this.libro.createFont();
+	                    fuente.setBold(true);
+	                    fuente.setUnderline(Font.U_SINGLE);  // subrayado simple
+	                    estilo.setFont(fuente);
+	                    
+	                    celda.setCellValue(formulario);
+	                    celda.setCellStyle(estilo);
+	                    celda.setCellStyle(estilo);
+	                    i++;	
+	            	}
+	            	//PREGUNTAS DE LA SEGUNDA CARA Y SIGUIENTES EN CASO O NO DE DIBUJO TECNICO
+	            	else if(i>12)
+	            	{
+	                    Row fila = hoja.getRow(i);
+	                    if (fila == null) fila = hoja.createRow(51+(i-13)*50);
+	                    Cell celda = fila.createCell(0);
+	                    
+	                    // Crear estilo con negrita
+	                    estilo = this.libro.createCellStyle();
+	                    fuente = this.libro.createFont();
+	                    fuente.setBold(true);
+	                    fuente.setUnderline(Font.U_SINGLE);  // subrayado simple
+	                    estilo.setFont(fuente);
+	                    
+	                    celda.setCellValue(formulario);
+	                    celda.setCellStyle(estilo);
+	                    i++;
+	            	} 
+	            }
+	        }
+	        else   //EN EL CASO DE QUE NO SEA DIBUJO TÉCNICO LA ASIGNATURA SELECCIONADA
+	        {
+	            for (String formulario : this.formularioExamen) 
+	            {
+	            	//DATOS DEL FORMULARIO DEL ALUMNO - PRIMERA CARA PARA TODOS LOS EXAMENES
+	            	if(i<=11)
+	            	{
+	                    Row fila = hoja.getRow(i);
+	                    if (fila == null) fila = hoja.createRow(i);
+	                    Cell celda = fila.createCell(0);
+	                    celda.setCellValue(formulario);
+	                    celda.setCellStyle(estilo);
+	                    i++;
+	            	}
+	            	//PREGUNTAS DE LA PRIMERA CARA
+	        		else if(i>11 && i<=14)  
+	            	{
+	                    Row fila = hoja.getRow(i);
+	                    if (fila == null) fila = hoja.createRow(18+(i-12)*10);
+	                    Cell celda = fila.createCell(0);
+	                    
+	                    // Crear estilo con negrita
+	                    estilo = this.libro.createCellStyle();
+	                    fuente = this.libro.createFont();
+	                    fuente.setBold(true);
+	                    fuente.setUnderline(Font.U_SINGLE);  // subrayado simple
+	                    estilo.setFont(fuente);
+	                    
+	                    celda.setCellValue(formulario);
+	                    celda.setCellStyle(estilo);
+	                    celda.setCellStyle(estilo);
+	                    i++;	
+	            	}
+	            	//PREGUNTAS DE LA SEGUNDA CARA Y SIGUIENTES EN CASO O NO DE DIBUJO TECNICO
+	            	else if(i>14)
+	            	{
+	                    Row fila = hoja.getRow(i);
+	                    if (fila == null) fila = hoja.createRow(50+(i-15)*20);
+	                    Cell celda = fila.createCell(0);
+	                    
+	                    // Crear estilo con negrita
+	                    estilo = this.libro.createCellStyle();
+	                    fuente = this.libro.createFont();
+	                    fuente.setBold(true);
+	                    fuente.setUnderline(Font.U_SINGLE);  // subrayado simple
+	                    estilo.setFont(fuente);
+	                    
+	                    celda.setCellValue(formulario);
+	                    celda.setCellStyle(estilo);
+	                    i++;
+	            	} 
+	            }
+	        }
 
-            // RELLENANDO TEMARIOS COMPLETOS
+   // B) RELLENANDO EL FORMULARIO DEL EXAMEN CON TODOS LOS DATOS DEL ALUMNO 
             for (i=0;i<11;i++)
             {
             	switch(i)
             	{
-	            	case 0:
+	            	case 0:  //NOMBRE ALUMNO
 	            	{
 	                  Row fila = hoja.getRow(i);
 	                  if (fila == null) fila = hoja.createRow(i);	
 	                  fila.createCell(1).setCellValue(alumno);
 	            	 break;
 	            	}
-	            	case 1:
+	            	case 1:  // CURSO DEL ALUMNO
 	            	{
 	                  Row fila = hoja.getRow(i);
 	                  if (fila == null) fila = hoja.createRow(i);	
 	                  fila.createCell(1).setCellValue(curso);
 	            	 break;
 	            	}
-	            	case 2:
+	            	case 2:  // ASIGNATURA DEL EXAMEN
 	            	{
 	                  Row fila = hoja.getRow(i);
 	                  if (fila == null) fila = hoja.createRow(i);	
 	                  fila.createCell(1).setCellValue(asignatura);
 	            	 break;
 	            	}
-	            	case 3,4,5,6,7:
+	            	case 3,4,5,6,7:   //TEMARIOS DE LA ASIGNATURA
 	            	{
 	            		//Se colocaon los temarios quitando el curso y la asignatura previa
 	                    for (String casilla : this.temariosCompletos)
@@ -460,7 +531,7 @@ class gestionExamenExcel
 	                    i--; //Factor correctivo porque por defecto suma una inidad mas a i y luego el bucle for añade otra unidad mas
 	            	 break;
 		            }
-	            	case 8:
+	            	case 8:   //DIA DE LA SEMANA QUE SE EXAMINA Y MES
 	            	{
 	            		String diaSemana="";
 	            		String numeroMes="";
@@ -500,7 +571,7 @@ class gestionExamenExcel
 	                  fila.createCell(1).setCellValue(examen);
 	            	 break;
 	            	}
-	            	case 9:
+	            	case 9:  //HORA A LA QUE SE EXAMINA
 	            	{
 	            		String examenHora= "A las: "+horarioSeleccionado+" horas";
 	                  Row fila = hoja.getRow(i);
@@ -570,12 +641,20 @@ class gestionExamenExcel
 			            celdaBorde.setCellStyle(estiloBordeGrueso);
 	            	}
 		    
-		    //Se modifican los parametros de la hoja en referente a estilos
+   //C) APLICACION DE ESTILOS A LAS PÁGINAS DE EXCEL
             estiloPagina();   
-            
-            //Se rellena el examen: LOGO + las preguntas insertadas como imagen
-            rellenarExamen(this.temariosCompletos); //Se rellena el examen: LOGO + las preguntas insertadas como imagen
-            
+                        
+   //D) INSERCCION DE LOGOS E IMAGENES DE LOS EXAMENES
+          //Se rellena el examen: LOGO + las preguntas insertadas como imagen
+          //Si es un examen de DIBUJO TÉCNICO el diseño del examen sera otro: TRUE           
+	        if(this.asignatura.equals("Dibujo Técnico"))
+	 	        {
+	        		rellenarExamen(this.temariosCompletos,true);
+	 	        }else
+	 	        {
+         //Si es un examen de otro tipo distinto a DIBUJO TECNICO el diseño del examen sera el estandar: FALSE
+	        		rellenarExamen(this.temariosCompletos,false);
+	 	        }
         	FileOutputStream archivo= new FileOutputStream(file);
             libro.write(archivo);
             archivo.close();
@@ -616,8 +695,13 @@ class gestionExamenExcel
 		ps.setFitWidth((short)1);
 		ps.setFitHeight((short)1);
 	}
+	
+	//AREA DE CONSTRUCCION DEL EXAMEN CON EL LOGO Y LAS PREGUNTAS
+	//TODOS LOS EXAMENES SERÁN IGUALES SALVO EL DE DIBUJO TÉCNICO CUYAS PREGUNTAS DE CONSIDERABLE EXTENSIÓN DE TRAZADO
+	//      OBLIGARÁ A QUE HAYA UNA PREGUNTA POR PÁGINA, NO VARIAS PREGUNTAS EN UNA PAGINA COMO ESTABA HECHO EN ESTADAR
+	
 	//SE INSERTAN EL LOGO Y LAS IMAGENES DE LOS CONTENIDOS ELEGIDOS DE LAS CARPETAS
-	public void rellenarExamen(List<String> temariosExamen)
+	public void rellenarExamen(List<String> temariosExamen, boolean examenDibujo)
 	{
 		//Definimos la hoja del libro EXCEL y un unico "dibujo" (patriarch) para toda la hoja
 		Sheet hoja = this.libro.getSheet("EXAMEN");
@@ -625,10 +709,20 @@ class gestionExamenExcel
 		Drawing<?> dibujo = hoja.createDrawingPatriarch();   //un solo patriarch: se reutiliza para todas las imagenes
 
 	//1) COLOCACION DE LOS LOGOS: el mismo logo en la esquina inferior derecha de cada una de las dos hojas/paginas
+		//NO ES EXAMEN DE DIBUJO TECNICO
 		byte[] bytesLogo = cargarBytesImagen(this.rutaUtilizados + "A3FLogo.jpg");
 		if (bytesLogo != null)
 		{
-			int numeroLogos = 2;   //una copia del logo por cada pagina impresa
+			int numeroLogos=0;
+			if(examenDibujo)
+			{
+				//ES EXAMEN DE DIBUJO TECNICO
+				numeroLogos = 6;   //una copia del logo por cada pagina impresa
+			}
+			else
+			{
+				numeroLogos = 2;   //una copia del logo por cada pagina impresa
+			}
 			for (int i = 0; i < numeroLogos; i++)
 			{
 				int idxLogo = this.libro.addPicture(bytesLogo, Workbook.PICTURE_TYPE_JPEG);
@@ -651,8 +745,31 @@ class gestionExamenExcel
 
 	//2) COLOCACION DE UNA IMAGEN ALEATORIA (SIN REPETIR) DEBAJO DE CADA "PREGUNTA 1..6"
 		//Filas donde estan las etiquetas PREGUNTA 1..6 (deben coincidir con preparacionExamenExcel):
-		//   PREGUNTA 1->18, 2->28, 3->38 (primera cara) y 4->50, 5->70, 6->90 (segunda cara)
-		int[] filasPreguntas = {18, 28, 38, 50, 70, 90};
+		int filasPreguntas[]= {0,0,0,0,0,0};
+		if(examenDibujo)
+		{
+			// PREGUNTA 1->18  (primera cara)
+			// PREGUNTA 2->51  (segunda cara)
+			// PREGUNTA 3->101 (tercera cara)
+			// PREGUNTA 4->151 (cuarta cara)
+			// PREGUNTA 5->201 (quinta cara)
+			// PREGUNTA 6->251 (sexta cara)
+			filasPreguntas[0]=18;
+			filasPreguntas[1]=51;
+			filasPreguntas[2]=101;
+			filasPreguntas[3]=151;
+			filasPreguntas[4]=201;
+			filasPreguntas[5]=251;
+		}
+		else{
+			//   PREGUNTA 1->18, 2->28, 3->38 (primera cara) y 4->50, 5->70, 6->90 (segunda cara)
+			filasPreguntas[0]=18;
+			filasPreguntas[1]=28;
+			filasPreguntas[2]=38;
+			filasPreguntas[3]=50;
+			filasPreguntas[4]=70;
+			filasPreguntas[5]=90;
+		}
 		int maxAnchoPx = 380;   //ancho maximo: poco mas de media pagina A4 en vertical (~660px utiles)
 
 		//Para cada carpeta de contenido preparamos una "baraja" de sus imagenes, para ir sacando
@@ -738,18 +855,29 @@ class gestionExamenExcel
 			int idxImagen = this.libro.addPicture(bytesImagen, tipoImagen(imagen.getName()));
 			ClientAnchor anclaImagen = helper.createClientAnchor();
 			//Tamaño absoluto en pixeles, independiente del ancho de las columnas
-			anclaImagen.setAnchorType(ClientAnchor.AnchorType.MOVE_DONT_RESIZE);
-			anclaImagen.setCol1(0);
-			anclaImagen.setRow1(fila);
-			anclaImagen.setCol2(5);  //Anchura de 5 celdas a la derecha por defecto para cualquier imagen
-			anclaImagen.setRow2(fila+5);  //Altura de 5 celdas hacia abajo para cualquier imagen 
-			anclaImagen.setDx1(0);
-			anclaImagen.setDy1(0);
-			anclaImagen.setDx2(Units.pixelToEMU(anchoPx));
-			anclaImagen.setDy2(Units.pixelToEMU(altoPx));
-			dibujo.createPicture(anclaImagen, idxImagen);
+
+				anclaImagen.setAnchorType(ClientAnchor.AnchorType.MOVE_DONT_RESIZE);
+				anclaImagen.setCol1(0);
+				anclaImagen.setRow1(fila);
+				anclaImagen.setCol2(5);  //Anchura de 5 celdas a la derecha por defecto para cualquier imagen
+				
+				
+				if(examenDibujo)   //ES EXAMEN DIBUJO TECNICO
+				{	
+				anclaImagen.setRow2(fila+12);  //Altura de 5 celdas hacia abajo para cualquier imagen
+				}
+				else			  //NO ES EXAMEN DIBUJO TECNICO
+				{
+					anclaImagen.setRow2(fila+5);  //Altura de 5 celdas hacia abajo para cualquier imagen
+				}
+				anclaImagen.setDx1(0);
+				anclaImagen.setDy1(0);
+				anclaImagen.setDx2(Units.pixelToEMU(anchoPx));
+				anclaImagen.setDy2(Units.pixelToEMU(altoPx));
+				dibujo.createPicture(anclaImagen, idxImagen);	
 		}
-	}
+ }
+	
 
 	//Lee de forma segura los bytes de una imagen; devuelve null si no se puede acceder a ella
 	private byte[] cargarBytesImagen(String ruta)
