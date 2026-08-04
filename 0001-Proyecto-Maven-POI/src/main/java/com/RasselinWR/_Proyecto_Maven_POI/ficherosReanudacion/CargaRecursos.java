@@ -659,7 +659,8 @@ class gestionExamenExcel
             libro.write(archivo);
             archivo.close();
             libro.close();
-            System.out.println("Excel editado correctamente");	            
+            System.out.println("Excel editado correctamente");	 
+			JOptionPane.showMessageDialog(null, "Fichero EXCEL creado. Búsquelo en el directorio 'ficherosGenerados'");
 	    } catch (Exception e) {
 	        e.printStackTrace();
 	        System.out.println("El error del caso 1 ha sido: "+e.getMessage()+" y la causa: "+e.getCause());
@@ -741,6 +742,7 @@ class gestionExamenExcel
 		else
 		{
 			System.out.println("AVISO: no se pudo acceder al logo en " + this.rutaUtilizados + "A3FLogo.jpg (se continua sin logo)");
+			JOptionPane.showMessageDialog(null, "El programa no puede encontrar el LOGO que se iba a implementar. Se seguirá editando sin él.");
 		}
 
 	//2) COLOCACION DE UNA IMAGEN ALEATORIA (SIN REPETIR) DEBAJO DE CADA "PREGUNTA 1..6"

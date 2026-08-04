@@ -1,0 +1,13 @@
+PASOS PARA CREACION DE JAR EEJCUTABLE DE JAVA:
+
+1) Botón derecho sobre el nombre del proyecto (margen izqwuierdo)
+2) Seleccionar "Export"
+3) Elegir el directorio Java
+4) Elegir Runnable Jar File
+5) Launch configuration: elegir o lo detecta automáticamente, sino elegir donde está la clase principal (class main)
+6) Despues en "Export destination": elegir el directorio en donde exportar el fichero JAR
+7) Darle a "Browse..." 
+8) Darle dentro de: "Library handling": La opción del medio
+9) OJO! si el ejecutable o programa posee dependencias de ficheros externos, se deberá ubicar en una zona donde fue programas las URLs de uso de ficheros externos.
+10) Luego será un ejecutable sin problema (siempre que el ordenador tenga la máquina virtual Java: MVJ)
+11) Saldrán algunas advertencias pero si salen errores se deberá corregir antes de crearlo

@@ -25,6 +25,7 @@ import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
 public class InterfazUsuario {
@@ -87,7 +88,7 @@ class laminaDispuesta extends JPanel implements ActionListener
 	
 	//DECLARACION DE BOTONES Y ACCIONAMIENTOS
 	private JButton aceptar= new JButton("ACEPTAR");
-	private JButton cancelar= new JButton("CANCELAR");
+	private JButton cancelar= new JButton("SALIR");
 	
 	//DECLARACION DEL ACCIONAMIENTO FECHA
 	private JXDatePicker datePicker = new JXDatePicker();
@@ -261,6 +262,7 @@ class laminaDispuesta extends JPanel implements ActionListener
 					this.horarioSeleccionado);
 		});
 		this.cancelar.addActionListener(e->{
+			JOptionPane.showMessageDialog(null, "Ha decidido salir, Hasta luego");
 			System.exit(0);  //Sale del programa y termina
 		});
 		
