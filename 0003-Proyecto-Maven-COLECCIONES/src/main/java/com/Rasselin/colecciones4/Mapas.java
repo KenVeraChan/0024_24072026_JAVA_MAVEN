@@ -79,7 +79,7 @@ public class Mapas {
 			}
 
 	}
-
+	
 }
 class Almacen
 {
