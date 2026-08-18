@@ -741,8 +741,12 @@ class gestionExamenExcel
 		}
 		else
 		{
-			System.out.println("AVISO: no se pudo acceder al logo en " + this.rutaUtilizados + "A3FLogo.jpg (se continua sin logo)");
-			JOptionPane.showMessageDialog(null, "El programa no puede encontrar el LOGO que se iba a implementar. Se seguirá editando sin él.");
+			JOptionPane.showMessageDialog(
+				    null,
+				    "AVISO: no se pudo acceder al logo en " + this.rutaUtilizados + "A3FLogo.jpg (se continua sin logo). Además, el programa no puede encontrar el LOGO que se iba a implementar. Se seguirá editando sin él.",
+				    "Información",
+				    JOptionPane.INFORMATION_MESSAGE
+				);
 		}
 
 	//2) COLOCACION DE UNA IMAGEN ALEATORIA (SIN REPETIR) DEBAJO DE CADA "PREGUNTA 1..6"
@@ -790,13 +794,23 @@ class gestionExamenExcel
 				File carpeta = new File(this.rutaUtilizados + temario);
 				if (!carpeta.exists() || !carpeta.isDirectory())
 				{
-					System.out.println("AVISO: carpeta de contenido no encontrada -> " + carpeta.getPath());
+					JOptionPane.showMessageDialog(
+						    null,
+						    "AVISO: carpeta de contenido no encontrada -> " + carpeta.getPath(),
+						    "Información",
+						    JOptionPane.INFORMATION_MESSAGE
+						);
 					continue;   //resolvemos el fallo de acceso saltando el contenido inexistente
 				}
 				File[] archivos = carpeta.listFiles(f -> f.isFile() && esImagen(f.getName()));
 				if (archivos == null || archivos.length == 0)
 				{
-					System.out.println("AVISO: la carpeta no contiene imagenes -> " + carpeta.getPath());
+					JOptionPane.showMessageDialog(
+						    null,
+						    "AVISO: la carpeta no contiene imagenes -> " + carpeta.getPath(),
+						    "Información",
+						    JOptionPane.INFORMATION_MESSAGE
+						);
 					continue;   //carpeta vacia: se salta sin romper la ejecucion
 				}
 				List<File> lista = new ArrayList<>(Arrays.asList(archivos));
@@ -808,7 +822,12 @@ class gestionExamenExcel
 
 		if (carpetasValidas.isEmpty())
 		{
-			System.out.println("AVISO: no hay ninguna carpeta con imagenes para las preguntas");
+			JOptionPane.showMessageDialog(
+				    null,
+				    "AVISO: no hay ninguna carpeta con imagenes para las preguntas",
+				    "Información",
+				    JOptionPane.INFORMATION_MESSAGE
+				);
 			return;
 		}
 
@@ -887,7 +906,12 @@ class gestionExamenExcel
 		File fichero = new File(ruta);
 		if (!fichero.exists() || !fichero.isFile())
 		{
-			System.out.println("AVISO: imagen no accesible -> " + ruta);
+			JOptionPane.showMessageDialog(
+				    null,
+				    "AVISO: imagen no accesible -> " + ruta,
+				    "Información",
+				    JOptionPane.INFORMATION_MESSAGE
+				);
 			return null;
 		}
 		try (InputStream entrada = new FileInputStream(fichero))
@@ -896,7 +920,12 @@ class gestionExamenExcel
 		}
 		catch (IOException e)
 		{
-			System.out.println("AVISO: fallo al leer la imagen -> " + ruta + " (" + e.getMessage() + ")");
+			JOptionPane.showMessageDialog(
+				    null,
+				    "AVISO: fallo al leer la imagen -> " + ruta + " (" + e.getMessage() + ")",
+				    "Información",
+				    JOptionPane.INFORMATION_MESSAGE
+				);
 			return null;
 		}
 	}
