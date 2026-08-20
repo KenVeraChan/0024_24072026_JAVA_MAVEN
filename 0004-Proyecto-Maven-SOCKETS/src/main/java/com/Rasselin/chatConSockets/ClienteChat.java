@@ -116,7 +116,7 @@ class InterfazCliente extends JPanel implements ActionListener, Runnable
 			//Creacion de SOCKET, OUTPUTSTREAM, PAQUETE MENSAJE PARA ENVIAR
 			
 			//ENVIANDO INFORMACION A TRAVÉS DE UN SOCKET, UN FLUJO DE TRANSMISION OUTPUTSTREAM Y UN OBJETO MENSAJE
-			Socket tunelComunicacion= new Socket("192.168.1.137",9999);
+			Socket tunelComunicacion= new Socket("192.168.1.136",9999);
 			    //IP donde se ejecuta el SERVIDOR, si el servidor esta en una maquina virtual o física 
 			    // es posible que la IP cambie cada vez que se encienda, luego se deberá cambiar esa IP
 			    // por la nueva que el sistema operativo posea haciendo CMD----> ipconfig -----> Direccion IPv4

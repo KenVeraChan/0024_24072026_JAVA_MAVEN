@@ -85,6 +85,7 @@ class laminaDispuesta extends JPanel implements ActionListener
 	private JLabel temario4= new JLabel("TEMARIO PREGUNTA 4: ");
 	private JLabel temario5= new JLabel("TEMARIO PREGUNTA 5: ");
 	private JLabel horarioExamen= new JLabel("HORA: ");
+	private JLabel preguntasExamen= new JLabel("Nº PREGUNTAS: ");
 	
 	//DECLARACION DE BOTONES Y ACCIONAMIENTOS
 	private JButton aceptar= new JButton("ACEPTAR");
@@ -99,6 +100,10 @@ class laminaDispuesta extends JPanel implements ActionListener
     private int puntero=0;
     JComboBox<String> horario;
    
+    //DECLARACION DEL ACCIONAMIENTO NUMERO DE PREGUNTAS
+    private String[] preguntas= new String[6];
+    JComboBox<String> interrogatorio;
+    
 	//Adapatabilidad de los formatos
 	private String cursoSeleccionado="";
 	private String asignaturaSeleccionada="";
@@ -107,6 +112,7 @@ class laminaDispuesta extends JPanel implements ActionListener
 	private String materia="";
     private Image imagen;
     private float alfaImagen = 1.0f; // opaco por defecto
+    private char caracterElegido;
     
     @Override
     protected void paintComponent(Graphics g) {
@@ -194,13 +200,29 @@ class laminaDispuesta extends JPanel implements ActionListener
 			this.cajaAsignaturas.addItem(dato);   //Se rellena el COMBOOX
 		}
 
-		//Rellenando el BOTON DE HORAS SWING
+		//Rellenando el BOTON DE HORAS SWING y Rellenando el BOTON DE LAS PREGUNTAS SWING
 	    for(int h = 0; h<24;h++) 
 	    {
+	    	if(h>=1 && h<=6)
+	    	{
+	    		if(h==1)
+	    		{
+		    		this.preguntas[h-1]=h+" pregunta";
+	    		}
+	    		else
+	    		{
+		    		this.preguntas[h-1]=h+" preguntas";
+	    		}
+	    		if(h==6)
+	    		{
+	    			this.preguntas[h-1]="EXAMEN COMPLETO";   //EXAMEN DISEÑADO CON 6 PREGUNTAS
+	    		}
+	    	}
 	        this.horas[puntero++] = String.format("%02d:00", h);
 	        this.horas[puntero++] = String.format("%02d:30", h);
 	    }
-	    this.horario = new JComboBox<>(horas);   //Se introducen todas las horas generadas en el combobox de horas
+	    this.horario = new JComboBox<>(this.horas);   //Se introducen todas las horas generadas en el combobox de horas
+	    this.interrogatorio= new JComboBox<>(this.preguntas);
 
 		//Guardamos la seleccion inicial (primer elemento que muestra cada combo)
 		this.cursoSeleccionado = (String) this.cajaCursos.getSelectedItem();
@@ -220,12 +242,65 @@ class laminaDispuesta extends JPanel implements ActionListener
 		    }
 		});
 		
-		//DETECTOR EN EL CAMBIO DE ELECCION DEL DESPLEGABLE DE LAS HORAS
-		this.horario.addItemListener(e -> {
-		    if (e.getStateChange() == ItemEvent.SELECTED) {
-		        this.horarioSeleccionado = (String) this.horario.getSelectedItem();
-		        actualizaMenu();
-		    }
+		//DETECTOR EN EL CAMBIO DE ELECCION DEL DESPLEGABLE DEL NUMERO DE PREGUNTAS ELEGIDAS
+		this.interrogatorio.addItemListener(e -> {
+			if(e.getStateChange()==ItemEvent.SELECTED)
+			{
+				//DETECTA EL NUMERO INTRODUCIDO DE LAS PREGUNTAS QUE SE SACARIAN
+				this.caracterElegido= e.getItem().toString().charAt(0);
+				switch(this.caracterElegido)
+				{
+					case '1':   //UNA SOLA PREGUNTA: Deshabilita 4 desplegables y deja habilitado 1
+					{
+						cajaTemario1.setEnabled(true);
+						cajaTemario2.setEnabled(false);
+						cajaTemario3.setEnabled(false);
+						cajaTemario4.setEnabled(false);
+						cajaTemario5.setEnabled(false);
+						break;
+					}
+					case '2':   //DOS PREGUNTAS: Deshabilita 3 desplegables y deja habilitado 2
+					{
+						cajaTemario1.setEnabled(true);
+						cajaTemario2.setEnabled(true);
+						cajaTemario3.setEnabled(false);
+						cajaTemario4.setEnabled(false);
+						cajaTemario5.setEnabled(false);
+						break;
+					}
+					case '3':   //TRES PREGUNTAS: Deshabilita 2 desplegables y deja habilitado 3
+					{
+						cajaTemario1.setEnabled(true);
+						cajaTemario2.setEnabled(true);
+						cajaTemario3.setEnabled(true);
+						cajaTemario4.setEnabled(false);
+						cajaTemario5.setEnabled(false);
+						break;
+					}
+					case '4':   //CUATRO PREGUNTAS: Deshabilita 1 desplegable y deja habilitado 4
+					{
+						cajaTemario1.setEnabled(true);
+						cajaTemario2.setEnabled(true);
+						cajaTemario3.setEnabled(true);
+						cajaTemario4.setEnabled(true);
+						cajaTemario5.setEnabled(false);
+						break;
+					}
+					case '5','E':   //CINCO PREGUNTAS: Deshabilita 0 desplegables y deja habilitado 5
+					{				//EN EL CASO DE ELEGIR EXAMEN COMPLETO SE PONDRÁN 6 PREGUNTAS NO 5 PREGUNTAS
+						cajaTemario1.setEnabled(true);
+						cajaTemario2.setEnabled(true);
+						cajaTemario3.setEnabled(true);
+						cajaTemario4.setEnabled(true);
+						cajaTemario5.setEnabled(true);
+						break;
+					}
+					default:   //NO HACE NADA
+					{
+						break;
+					}
+				}
+			}
 		});
 		
 		//Primer volcado de temarios segun la seleccion inicial de curso y asignatura
@@ -259,7 +334,8 @@ class laminaDispuesta extends JPanel implements ActionListener
 					(String)this.cajaTemario4.getSelectedItem(),
 					(String)this.cajaTemario5.getSelectedItem(),
 					this.calendario,
-					this.horarioSeleccionado);
+					this.horarioSeleccionado,
+					this.caracterElegido);
 		});
 		this.cancelar.addActionListener(e->{
 			JOptionPane.showMessageDialog(null, "Ha decidido salir, Hasta luego");
@@ -283,8 +359,11 @@ class laminaDispuesta extends JPanel implements ActionListener
 		this.fecha.setBounds(200, 90, 450, 30);
 		this.datePicker.setBounds(200, 120, 120, 30);
 		
-		this.asignatura.setBounds(20, 150, 450, 30);
-		this.cajaAsignaturas.setBounds(20, 180, 450, 30);
+		this.asignatura.setBounds(20, 150, 150, 30);
+		this.cajaAsignaturas.setBounds(20, 180, 150, 30);
+		
+		this.preguntasExamen.setBounds(200, 150, 120, 30);
+		this.interrogatorio.setBounds(200,180,120,30);
 		
 		this.temario1.setBounds(20, 210, 450, 30);
 		this.cajaTemario1.setBounds(20, 240, 450, 30);
@@ -327,8 +406,14 @@ class laminaDispuesta extends JPanel implements ActionListener
 		add(this.datePicker);
 		add(this.horario);
 		add(this.horarioExamen);
+		add(this.preguntasExamen);
+		add(this.interrogatorio);
 	}
 
+	private int parseInt(char charAt) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
 	@Override
 	public void actionPerformed(ActionEvent e) {}
 	public void actualizaMenu()

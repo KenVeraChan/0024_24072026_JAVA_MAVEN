@@ -305,6 +305,9 @@ class gestionExamenExcel
 	private String horarioSeleccionado="";
 	private String rutaGenerados="ficherosGenerados/examen.xlsx";
 	private String rutaUtilizados="ficherosUtilizados/";
+	private int filasPreguntas[];
+	private int numeroLogos=0; //LOGOS IMPUESTOS EN LAS HOJAS DE EXCEL
+	private int modForm=0;   //Modifica la amplitud de la estructura del formulario según la cantidad de preguntas
 	
 	//private Date fecha= new Date();   //Fecha de Java util
 	
@@ -326,7 +329,7 @@ class gestionExamenExcel
 	{
 		return this.libro;
 	}
-	public void preparacionExamenExcel(String alumno,String curso,String asignatura,String temario1, String temario2, String temario3, String temario4, String temario5, Date fechaExamen, String horarioSeleccionado)
+	public void preparacionExamenExcel(String alumno,String curso,String asignatura,String temario1, String temario2, String temario3, String temario4, String temario5, Date fechaExamen, String horarioSeleccionado, char eleccionPreguntas)
 	{
 		this.alumno=alumno;
 		this.curso=curso;
@@ -348,24 +351,118 @@ class gestionExamenExcel
 		this.temariosCompletos.add(temario4);
 		this.temariosCompletos.add(temario5);
 
-		this.formularioExamen.add("ALUMNO:");
+		this.formularioExamen.add("ALUMNO:");            
 		this.formularioExamen.add("CURSO:");
 		this.formularioExamen.add("ASIGNATURA:");
-		this.formularioExamen.add("CONTENIDO 1:");
-		this.formularioExamen.add("CONTENIDO 2:");
-		this.formularioExamen.add("CONTENIDO 3:");
-		this.formularioExamen.add("CONTENIDO 4:");
-		this.formularioExamen.add("CONTENIDO 5:");
+			
+		switch(eleccionPreguntas)
+		{
+			case '1':
+			{
+				this.formularioExamen.add("CONTENIDO 1:");
+				this.modForm=4;    //QUITA 4 FILAS DEL FORMULARIO Y SOLO PONE 1 CONTENIDO
+				break;
+			}
+			case '2':
+			{
+				this.formularioExamen.add("CONTENIDO 1:");
+				this.formularioExamen.add("CONTENIDO 2:");
+				this.modForm=3;    //QUITA 3 FILAS DEL FORMULARIO Y SOLO PONE 2 CONTENIDOS
+				break;
+			}
+			case '3':
+			{
+				this.formularioExamen.add("CONTENIDO 1:");
+				this.formularioExamen.add("CONTENIDO 2:");
+				this.formularioExamen.add("CONTENIDO 3:");
+				this.modForm=2;    //QUITA 2 FILAS DEL FORMULARIO Y SOLO PONE 3 CONTENIDOS
+				break;
+			}
+			case '4':
+			{
+				this.formularioExamen.add("CONTENIDO 1:");
+				this.formularioExamen.add("CONTENIDO 2:");
+				this.formularioExamen.add("CONTENIDO 3:");
+				this.formularioExamen.add("CONTENIDO 4:");
+				this.modForm=1;    //QUITA 1 FILAS DEL FORMULARIO Y SOLO PONE 4 CONTENIDOS
+				break;
+			}
+			case '5','E':
+			{
+				this.formularioExamen.add("CONTENIDO 1:");
+				this.formularioExamen.add("CONTENIDO 2:");
+				this.formularioExamen.add("CONTENIDO 3:");
+				this.formularioExamen.add("CONTENIDO 4:");
+				this.formularioExamen.add("CONTENIDO 5:");
+				this.modForm=0;     //QUITA 0 FILAS DEL FORMULARIO Y SOLO PONE 5 CONTENIDOS
+				break;
+			}
+			default:
+			{
+				//No hace nada y como fallo se considera nulo
+				break;
+			}
+		}
+		
 		this.formularioExamen.add("FECHA:");
-		this.formularioExamen.add("HORARIO");
+		this.formularioExamen.add("HORARIO:");
 		this.formularioExamen.add("CORREO:");
 		this.formularioExamen.add("COMENTARIOS:");
-		this.formularioExamen.add("PREGUNTA 1:");
-		this.formularioExamen.add("PREGUNTA 2:");
-		this.formularioExamen.add("PREGUNTA 3:");
-		this.formularioExamen.add("PREGUNTA 4:");
-		this.formularioExamen.add("PREGUNTA 5:");
-		this.formularioExamen.add("PREGUNTA 6:");
+		
+		
+		switch(eleccionPreguntas)
+		{
+			case '1':
+			{
+				this.formularioExamen.add("PREGUNTA 1:");
+				break;
+			}
+			case '2':
+			{
+				this.formularioExamen.add("PREGUNTA 1:");
+				this.formularioExamen.add("PREGUNTA 2:");
+				break;
+			}
+			case '3':
+			{
+				this.formularioExamen.add("PREGUNTA 1:");
+				this.formularioExamen.add("PREGUNTA 2:");
+				this.formularioExamen.add("PREGUNTA 3:");
+				break;
+			}
+			case '4':
+			{
+				this.formularioExamen.add("PREGUNTA 1:");
+				this.formularioExamen.add("PREGUNTA 2:");
+				this.formularioExamen.add("PREGUNTA 3:");
+				this.formularioExamen.add("PREGUNTA 4:");
+				break;
+			}
+			case '5':
+			{
+				this.formularioExamen.add("PREGUNTA 1:");
+				this.formularioExamen.add("PREGUNTA 2:");
+				this.formularioExamen.add("PREGUNTA 3:");
+				this.formularioExamen.add("PREGUNTA 4:");
+				this.formularioExamen.add("PREGUNTA 5:");
+				break;
+			}
+			case 'E':
+			{
+				this.formularioExamen.add("PREGUNTA 1:");
+				this.formularioExamen.add("PREGUNTA 2:");
+				this.formularioExamen.add("PREGUNTA 3:");
+				this.formularioExamen.add("PREGUNTA 4:");
+				this.formularioExamen.add("PREGUNTA 5:");
+				this.formularioExamen.add("PREGUNTA 6:");
+				break;
+			}
+			default:
+			{
+				//No hace nada y como fallo se considera nulo
+				break;
+			}
+		}
 		
 		try {			
 			InputStream ruta = new FileInputStream(file);
@@ -390,7 +487,7 @@ class gestionExamenExcel
 	            for (String formulario : this.formularioExamen) 
 	            {
 	            	//DATOS DEL FORMULARIO DEL ALUMNO - PRIMERA CARA PARA TODOS LOS EXAMENES
-	            	if(i<=11)
+	            	if(i<=(11-this.modForm))
 	            	{
 	                    Row fila = hoja.getRow(i);
 	                    if (fila == null) fila = hoja.createRow(i);
@@ -400,7 +497,7 @@ class gestionExamenExcel
 	                    i++;
 	            	}
 	            	//PREGUNTAS DE LA PRIMERA CARA
-	        		else if(i==12)  
+	        		else if(i==(12-this.modForm))  
 	            	{
 	                    Row fila = hoja.getRow(i);
 	                    if (fila == null) fila = hoja.createRow(18);
@@ -419,10 +516,11 @@ class gestionExamenExcel
 	                    i++;	
 	            	}
 	            	//PREGUNTAS DE LA SEGUNDA CARA Y SIGUIENTES EN CASO O NO DE DIBUJO TECNICO
-	            	else if(i>12)
+	            	else if(i>(12-this.modForm))
 	            	{
+	            		System.out.println(12-this.modForm);
 	                    Row fila = hoja.getRow(i);
-	                    if (fila == null) fila = hoja.createRow(51+(i-13)*50);
+	                    if (fila == null) fila = hoja.createRow(51+(i-13+this.modForm)*50);
 	                    Cell celda = fila.createCell(0);
 	                    
 	                    // Crear estilo con negrita
@@ -443,7 +541,7 @@ class gestionExamenExcel
 	            for (String formulario : this.formularioExamen) 
 	            {
 	            	//DATOS DEL FORMULARIO DEL ALUMNO - PRIMERA CARA PARA TODOS LOS EXAMENES
-	            	if(i<=11)
+	            	if(i<=(11-this.modForm))
 	            	{
 	                    Row fila = hoja.getRow(i);
 	                    if (fila == null) fila = hoja.createRow(i);
@@ -453,10 +551,10 @@ class gestionExamenExcel
 	                    i++;
 	            	}
 	            	//PREGUNTAS DE LA PRIMERA CARA
-	        		else if(i>11 && i<=14)  
+	        		else if(i>(11-this.modForm) && i<=(14-this.modForm))  
 	            	{
 	                    Row fila = hoja.getRow(i);
-	                    if (fila == null) fila = hoja.createRow(18+(i-12)*10);
+	                    if (fila == null) fila = hoja.createRow(18+(i-12+this.modForm)*10);
 	                    Cell celda = fila.createCell(0);
 	                    
 	                    // Crear estilo con negrita
@@ -472,10 +570,10 @@ class gestionExamenExcel
 	                    i++;	
 	            	}
 	            	//PREGUNTAS DE LA SEGUNDA CARA Y SIGUIENTES EN CASO O NO DE DIBUJO TECNICO
-	            	else if(i>14)
+	            	else if(i>(14-this.modForm))
 	            	{
 	                    Row fila = hoja.getRow(i);
-	                    if (fila == null) fila = hoja.createRow(50+(i-15)*20);
+	                    if (fila == null) fila = hoja.createRow(50+(i-15+this.modForm)*20);
 	                    Cell celda = fila.createCell(0);
 	                    
 	                    // Crear estilo con negrita
@@ -493,7 +591,7 @@ class gestionExamenExcel
 	        }
 
    // B) RELLENANDO EL FORMULARIO DEL EXAMEN CON TODOS LOS DATOS DEL ALUMNO 
-            for (i=0;i<11;i++)
+            for (i=0;i<(11-this.modForm);i++)
             {
             	switch(i)
             	{
@@ -518,19 +616,87 @@ class gestionExamenExcel
 	                  fila.createCell(1).setCellValue(asignatura);
 	            	 break;
 	            	}
-	            	case 3,4,5,6,7:   //TEMARIOS DE LA ASIGNATURA
+	            	case 3:   //TEMARIOS DE LA ASIGNATURA
 	            	{
-	            		//Se colocaon los temarios quitando el curso y la asignatura previa
-	                    for (String casilla : this.temariosCompletos)
-	                    {
-	                       Row fila = hoja.getRow(i);
-	                	   if (fila == null) fila = hoja.createRow(i);	
-	                       fila.createCell(1).setCellValue(sinPrefijo(casilla));
-	                      i++;
-	                    }
+	            		if(this.modForm>=4)
+	            		{
+		            		//Se colocaon los temarios quitando el curso y la asignatura previa
+		                    for (String casilla : this.temariosCompletos)
+		                    {
+		                       Row fila = hoja.getRow(i);
+		                	   if (fila == null) fila = hoja.createRow(i);	
+		                       fila.createCell(1).setCellValue(sinPrefijo(casilla));
+		                      i++;
+		                    }
+		                    i--; //Factor correctivo porque por defecto suma una inidad mas a i y luego el bucle for añade otra unidad mas
+	            		}
+	            		break;
+		            }
+	            	case 4:   //TEMARIOS DE LA ASIGNATURA
+	            	{
+	            		if(this.modForm>=3)
+	            		{
+		            		//Se colocaon los temarios quitando el curso y la asignatura previa
+		                    for (String casilla : this.temariosCompletos)
+		                    {
+		                       Row fila = hoja.getRow(i);
+		                	   if (fila == null) fila = hoja.createRow(i);	
+		                       fila.createCell(1).setCellValue(sinPrefijo(casilla));
+		                      i++;
+		                    }
+	                    i--; //Factor correctivo porque por defecto suma una inidad mas a i y luego el bucle for añade otra unidad mas
+	            		}
+	                   break;
+		            }
+	            	case 5:   //TEMARIOS DE LA ASIGNATURA
+	            	{
+	            		if(this.modForm>=2)
+	            		{
+		            		//Se colocaon los temarios quitando el curso y la asignatura previa
+		                    for (String casilla : this.temariosCompletos)
+		                    {
+		                       Row fila = hoja.getRow(i);
+		                	   if (fila == null) fila = hoja.createRow(i);	
+		                       fila.createCell(1).setCellValue(sinPrefijo(casilla));
+		                      i++;
+		                    }
+	            		}
 	                    i--; //Factor correctivo porque por defecto suma una inidad mas a i y luego el bucle for añade otra unidad mas
 	            	 break;
 		            }
+	            	case 6:   //TEMARIOS DE LA ASIGNATURA
+	            	{
+	            		if(this.modForm>=1)
+	            		{
+		            		//Se colocaon los temarios quitando el curso y la asignatura previa
+		                    for (String casilla : this.temariosCompletos)
+		                    {
+		                       Row fila = hoja.getRow(i);
+		                	   if (fila == null) fila = hoja.createRow(i);	
+		                       fila.createCell(1).setCellValue(sinPrefijo(casilla));
+		                      i++;
+		                    }
+	            		}
+	                    i--; //Factor correctivo porque por defecto suma una inidad mas a i y luego el bucle for añade otra unidad mas
+	            	 break;
+		            }
+	            	case 7:   //TEMARIOS DE LA ASIGNATURA
+	            	{
+	            		if(this.modForm>=0)
+	            		{
+		            		//Se colocaon los temarios quitando el curso y la asignatura previa
+		                    for (String casilla : this.temariosCompletos)
+		                    {
+		                       Row fila = hoja.getRow(i);
+		                	   if (fila == null) fila = hoja.createRow(i);	
+		                       fila.createCell(1).setCellValue(sinPrefijo(casilla));
+		                      i++;
+		                    }
+	            		}
+	                    i--; //Factor correctivo porque por defecto suma una inidad mas a i y luego el bucle for añade otra unidad mas
+	            	 break;
+		            }
+
 	            	case 8:   //DIA DE LA SEMANA QUE SE EXAMINA Y MES
 	            	{
 	            		String diaSemana="";
@@ -649,11 +815,11 @@ class gestionExamenExcel
           //Si es un examen de DIBUJO TÉCNICO el diseño del examen sera otro: TRUE           
 	        if(this.asignatura.equals("Dibujo Técnico"))
 	 	        {
-	        		rellenarExamen(this.temariosCompletos,true);
+	        		rellenarExamen(this.temariosCompletos,true,eleccionPreguntas);
 	 	        }else
 	 	        {
          //Si es un examen de otro tipo distinto a DIBUJO TECNICO el diseño del examen sera el estandar: FALSE
-	        		rellenarExamen(this.temariosCompletos,false);
+	        		rellenarExamen(this.temariosCompletos,false,eleccionPreguntas);
 	 	        }
         	FileOutputStream archivo= new FileOutputStream(file);
             libro.write(archivo);
@@ -702,7 +868,7 @@ class gestionExamenExcel
 	//      OBLIGARÁ A QUE HAYA UNA PREGUNTA POR PÁGINA, NO VARIAS PREGUNTAS EN UNA PAGINA COMO ESTABA HECHO EN ESTADAR
 	
 	//SE INSERTAN EL LOGO Y LAS IMAGENES DE LOS CONTENIDOS ELEGIDOS DE LAS CARPETAS
-	public void rellenarExamen(List<String> temariosExamen, boolean examenDibujo)
+	public void rellenarExamen(List<String> temariosExamen, boolean examenDibujo, char eleccionPreguntas)
 	{
 		//Definimos la hoja del libro EXCEL y un unico "dibujo" (patriarch) para toda la hoja
 		Sheet hoja = this.libro.getSheet("EXAMEN");
@@ -714,17 +880,72 @@ class gestionExamenExcel
 		byte[] bytesLogo = cargarBytesImagen(this.rutaUtilizados + "A3FLogo.jpg");
 		if (bytesLogo != null)
 		{
-			int numeroLogos=0;
 			if(examenDibujo)
 			{
-				//ES EXAMEN DE DIBUJO TECNICO
-				numeroLogos = 6;   //una copia del logo por cada pagina impresa
+				//CONSIDERACION 1: ES EXAMEN DE DIBUJO TECNICO
+				//CONSIDERACION 2: PERO DEPENDE DE LA CANTIDAD DE PREGUNTAS QUE SE HAYA ELEGIDO
+				switch(eleccionPreguntas)
+				{
+					case '1':
+					{
+						this.numeroLogos = 1;   //una copia del logo por cada pagina impresa
+						break;
+					}
+					case '2':
+					{
+						this.numeroLogos = 2;   //una copia del logo por cada pagina impresa
+						break;
+					}
+					case '3':
+					{
+						this.numeroLogos = 3;   //una copia del logo por cada pagina impresa
+						break;
+					}
+					case '4':
+					{
+						this.numeroLogos = 4;   //una copia del logo por cada pagina impresa
+						break;
+					}
+					case '5':
+					{
+						this.numeroLogos = 5;   //una copia del logo por cada pagina impresa
+						break;
+					}
+					case 'E':
+					{
+						//AL NO ELEGIR CUANTAS PREGUNTAS SE PONDRÁ UN EXAMEN COMPLETO DE 6 PREGUNTAS
+						this.numeroLogos = 6;
+						break;
+					}
+					default:
+					{
+						//No hace nada y como fallo se considera nulo
+						break;
+					}
+				}
 			}
 			else
 			{
-				numeroLogos = 2;   //una copia del logo por cada pagina impresa
+				switch(eleccionPreguntas)
+				{
+					case '1','2','3':
+					{
+						this.numeroLogos = 1;   //una copia del logo: primera pagina con 3 preguntas: 1 logo
+						break;
+					}
+					case '4','5','E':
+					{
+						this.numeroLogos = 2;   //si hay mas preguntas o es examen completo: 2 logos
+						break;
+					}
+					default:
+					{
+						//No considerado
+						break;
+					}
+				}
 			}
-			for (int i = 0; i < numeroLogos; i++)
+			for (int i = 0; i < this.numeroLogos; i++)
 			{
 				int idxLogo = this.libro.addPicture(bytesLogo, Workbook.PICTURE_TYPE_JPEG);
 				ClientAnchor anclaLogo = helper.createClientAnchor();
@@ -751,7 +972,7 @@ class gestionExamenExcel
 
 	//2) COLOCACION DE UNA IMAGEN ALEATORIA (SIN REPETIR) DEBAJO DE CADA "PREGUNTA 1..6"
 		//Filas donde estan las etiquetas PREGUNTA 1..6 (deben coincidir con preparacionExamenExcel):
-		int filasPreguntas[]= {0,0,0,0,0,0};
+		this.filasPreguntas= new int[this.numeroLogos];
 		if(examenDibujo)
 		{
 			// PREGUNTA 1->18  (primera cara)
@@ -760,21 +981,32 @@ class gestionExamenExcel
 			// PREGUNTA 4->151 (cuarta cara)
 			// PREGUNTA 5->201 (quinta cara)
 			// PREGUNTA 6->251 (sexta cara)
-			filasPreguntas[0]=18;
-			filasPreguntas[1]=51;
-			filasPreguntas[2]=101;
-			filasPreguntas[3]=151;
-			filasPreguntas[4]=201;
-			filasPreguntas[5]=251;
+			this.filasPreguntas[0]=18;
+			for(int i=1;i<this.filasPreguntas.length;i++)
+			{
+				this.filasPreguntas[i]=51+50*(i-1);
+			}
 		}
 		else{
 			//   PREGUNTA 1->18, 2->28, 3->38 (primera cara) y 4->50, 5->70, 6->90 (segunda cara)
-			filasPreguntas[0]=18;
-			filasPreguntas[1]=28;
-			filasPreguntas[2]=38;
-			filasPreguntas[3]=50;
-			filasPreguntas[4]=70;
-			filasPreguntas[5]=90;
+			// PREGUNTA 1->18  (primera cara)
+			// PREGUNTA 2->28  (primera cara)
+			// PREGUNTA 3->38 (primera cara)
+			// PREGUNTA 4->50 (primera cara)
+			// PREGUNTA 5->70 (segunda cara)
+			// PREGUNTA 6->90 (segunda cara)
+			
+			for(int i=0;i<this.filasPreguntas.length;i++)
+			{
+				if(i>=0 && i<=2)
+				{
+					this.filasPreguntas[i]=18+10*i;
+				}
+				else
+				{
+					this.filasPreguntas[i]=50+20*(i-3);
+				}
+			}
 		}
 		int maxAnchoPx = 380;   //ancho maximo: poco mas de media pagina A4 en vertical (~660px utiles)
 
@@ -832,7 +1064,7 @@ class gestionExamenExcel
 		}
 
 		//Recorremos las 6 preguntas y colocamos UNA imagen aleatoria debajo de cada etiqueta
-		for (int p = 0; p < filasPreguntas.length; p++)
+		for (int p = 0; p < this.filasPreguntas.length; p++)
 		{
 			//La pregunta p usa la carpeta correspondiente (se van rotando las carpetas disponibles)
 			String carpeta = carpetasValidas.get(p % carpetasValidas.size());
@@ -872,7 +1104,7 @@ class gestionExamenExcel
 				altoPx = (int) Math.round(dim[1] * escala);
 			}
 
-			int fila = filasPreguntas[p] + 1;   //justo DEBAJO de la etiqueta de la pregunta
+			int fila = this.filasPreguntas[p] + 1;   //justo DEBAJO de la etiqueta de la pregunta
 			int idxImagen = this.libro.addPicture(bytesImagen, tipoImagen(imagen.getName()));
 			ClientAnchor anclaImagen = helper.createClientAnchor();
 			//Tamaño absoluto en pixeles, independiente del ancho de las columnas

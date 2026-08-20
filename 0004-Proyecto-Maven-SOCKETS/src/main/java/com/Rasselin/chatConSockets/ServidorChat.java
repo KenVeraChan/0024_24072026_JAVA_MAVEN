@@ -7,8 +7,10 @@ import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.UnknownHostException;
 
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
@@ -40,6 +42,28 @@ class MarcoServidorChat extends JFrame
         this.servidor1= new InterfazServidor();
         add(servidor1);
         setVisible(true);
+        //estableceConexionServidor();
+	}
+	public void estableceConexionServidor()
+	{
+		try {
+			Socket tunelComunicacion= new Socket("192.168.1.136",9999);
+			
+			PaqueteMensaje mensaje= new PaqueteMensaje();
+			
+			mensaje.setMensaje(" online");
+			
+			ObjectOutputStream envioPaquete= new ObjectOutputStream(tunelComunicacion.getOutputStream());
+
+			envioPaquete.writeObject(mensaje);
+			
+		} catch (UnknownHostException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 }
 
@@ -81,6 +105,15 @@ class InterfazServidor extends JPanel implements ActionListener,Runnable
 				//SIEMPRE ESCUCHANDO
 				// Se aceptan todas las comunicaciones que vengan por este tunel
 				Socket entrada= receptor.accept();
+				
+				//DETECCION DE LAS IPS QUE SE CONECTAN AL SERVIDOR
+				InetAddress direccionClientes=entrada.getInetAddress();
+				
+				//Convertir la direccionClientes en formato IP reconocida
+				String IPClienteConectado= direccionClientes.getHostAddress();
+				
+				//Prueba de funcionamiento
+				System.out.println("Direccion remota conectada: "+IPClienteConectado);
 				
 				// Se fijan el flujo de datos de entrada
 				ObjectInputStream flujoDatos= new ObjectInputStream(entrada.getInputStream());
