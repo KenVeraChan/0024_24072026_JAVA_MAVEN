@@ -616,89 +616,31 @@ class gestionExamenExcel
 	                  fila.createCell(1).setCellValue(asignatura);
 	            	 break;
 	            	}
-	            	case 3:   //TEMARIOS DE LA ASIGNATURA
+	            	case 3,4,5,6,7:   //TEMARIOS DE LA ASIGNATURA
 	            	{
-	            		if(this.modForm>=4)
-	            		{
-		            		//Se colocaon los temarios quitando el curso y la asignatura previa
+	            		//Se colocaron los temarios quitando el curso y la asignatura previa
 		                    for (String casilla : this.temariosCompletos)
 		                    {
-		                       Row fila = hoja.getRow(i);
-		                	   if (fila == null) fila = hoja.createRow(i);	
-		                       fila.createCell(1).setCellValue(sinPrefijo(casilla));
-		                      i++;
+		                       if(asignacionNumerica(this.modForm)-i>=0)
+		                       {
+			                       Row fila = hoja.getRow(i);
+			                	   if (fila == null) fila = hoja.createRow(i);	
+			                       fila.createCell(1).setCellValue(sinPrefijo(casilla));
+		                       }
+			                 i++;  
 		                    }
-		                    i--; //Factor correctivo porque por defecto suma una inidad mas a i y luego el bucle for añade otra unidad mas
-	            		}
+		                    //Factor correctivo porque por defecto suma una inidad mas a i y luego el bucle for añade otra unidad mas
 	            		break;
 		            }
-	            	case 4:   //TEMARIOS DE LA ASIGNATURA
+	            	default:
 	            	{
-	            		if(this.modForm>=3)
-	            		{
-		            		//Se colocaon los temarios quitando el curso y la asignatura previa
-		                    for (String casilla : this.temariosCompletos)
-		                    {
-		                       Row fila = hoja.getRow(i);
-		                	   if (fila == null) fila = hoja.createRow(i);	
-		                       fila.createCell(1).setCellValue(sinPrefijo(casilla));
-		                      i++;
-		                    }
-	                    i--; //Factor correctivo porque por defecto suma una inidad mas a i y luego el bucle for añade otra unidad mas
-	            		}
-	                   break;
-		            }
-	            	case 5:   //TEMARIOS DE LA ASIGNATURA
-	            	{
-	            		if(this.modForm>=2)
-	            		{
-		            		//Se colocaon los temarios quitando el curso y la asignatura previa
-		                    for (String casilla : this.temariosCompletos)
-		                    {
-		                       Row fila = hoja.getRow(i);
-		                	   if (fila == null) fila = hoja.createRow(i);	
-		                       fila.createCell(1).setCellValue(sinPrefijo(casilla));
-		                      i++;
-		                    }
-	            		}
-	                    i--; //Factor correctivo porque por defecto suma una inidad mas a i y luego el bucle for añade otra unidad mas
-	            	 break;
-		            }
-	            	case 6:   //TEMARIOS DE LA ASIGNATURA
-	            	{
-	            		if(this.modForm>=1)
-	            		{
-		            		//Se colocaon los temarios quitando el curso y la asignatura previa
-		                    for (String casilla : this.temariosCompletos)
-		                    {
-		                       Row fila = hoja.getRow(i);
-		                	   if (fila == null) fila = hoja.createRow(i);	
-		                       fila.createCell(1).setCellValue(sinPrefijo(casilla));
-		                      i++;
-		                    }
-	            		}
-	                    i--; //Factor correctivo porque por defecto suma una inidad mas a i y luego el bucle for añade otra unidad mas
-	            	 break;
-		            }
-	            	case 7:   //TEMARIOS DE LA ASIGNATURA
-	            	{
-	            		if(this.modForm>=0)
-	            		{
-		            		//Se colocaon los temarios quitando el curso y la asignatura previa
-		                    for (String casilla : this.temariosCompletos)
-		                    {
-		                       Row fila = hoja.getRow(i);
-		                	   if (fila == null) fila = hoja.createRow(i);	
-		                       fila.createCell(1).setCellValue(sinPrefijo(casilla));
-		                      i++;
-		                    }
-	            		}
-	                    i--; //Factor correctivo porque por defecto suma una inidad mas a i y luego el bucle for añade otra unidad mas
-	            	 break;
-		            }
-
-	            	case 8:   //DIA DE LA SEMANA QUE SE EXAMINA Y MES
-	            	{
+	            		//Pendiente de definir correos para su posterior modificación y codigo completo
+	            		break;
+	            	}
+            	}
+            }
+	            	   //DIA DE LA SEMANA QUE SE EXAMINA Y MES
+	            	
 	            		String diaSemana="";
 	            		String numeroMes="";
 	            	  //Tratamiento previo de la fecha para conglomerarlo mejor
@@ -732,26 +674,16 @@ class gestionExamenExcel
 	            			default:{break;}
 	            		}
 	                  String examen= diaSemana+", dia "+fecha.getDayOfMonth()+" de "+numeroMes+" del "+fecha.getYear();
-	            	  Row fila = hoja.getRow(i);
-	                  if (fila == null) fila = hoja.createRow(i);	
+	            	  Row fila = hoja.getRow(asignacionNumerica(this.modForm)+1);
+	                  if (fila == null) fila = hoja.createRow(asignacionNumerica(this.modForm)+1);	
 	                  fila.createCell(1).setCellValue(examen);
-	            	 break;
-	            	}
-	            	case 9:  //HORA A LA QUE SE EXAMINA
-	            	{
+
+	            	  //HORA A LA QUE SE EXAMINA
+	            	
 	            		String examenHora= "A las: "+horarioSeleccionado+" horas";
-	                  Row fila = hoja.getRow(i);
-	                  if (fila == null) fila = hoja.createRow(i);	
-	                  fila.createCell(1).setCellValue(examenHora);
-	            	 break;
-	            	}
-	            	default:
-	            	{
-	            		//Pendiente de definir correos para su posterior modificación y codigo completo
-	            		break;
-	            	}
-            	}
-            }
+	                  Row fila1 = hoja.getRow(asignacionNumerica(this.modForm)+2);
+	                  if (fila1 == null) fila1 = hoja.createRow(asignacionNumerica(this.modForm)+2);	
+	                  fila1.createCell(1).setCellValue(examenHora);
 
             // PALABRA CALIFICACIÓN (en el formulario procedimiento para darle estilos)
 	            // CREAR ESTILO FORMATO NEGRITA
@@ -833,6 +765,27 @@ class gestionExamenExcel
 	        System.out.println("Se debera crear el fichero de EXCEL previamente");
 	    }
 	}
+	
+	public int asignacionNumerica(int numPreguntas)
+	{
+		//SI RECIBE UN 4 DE ENTERO -----> SOLO SE PONDRA  1 PREGUNTA  ----> SALE 3
+		//SI RECIBE UN 3 DE ENTERO -----> SOLO SE PONDRAN 2 PREGUNTAS ----> SALE 4
+		//SI RECIBE UN 2 DE ENTERO -----> SOLO SE PONDRAN 3 PREGUNTAS ----> SALE 5
+		//SI RECIBE UN 1 DE ENTERO -----> SOLO SE PONDRAN 4 PREGUNTAS ----> SALE 6
+		//SI RECIBE UN 0 DE ENTERO -----> SOLO SE PONDRAN 5 PREGUNTAS ----> SALE 7
+		int preguntas=0;
+		switch(numPreguntas)
+		{
+			case 0:{preguntas=5;break;}
+			case 1:{preguntas=4;break;}
+			case 2:{preguntas=3;break;}
+			case 3:{preguntas=2;break;}
+			case 4:{preguntas=1;break;}
+			default:{break;}
+		}
+		return preguntas+2;
+	}
+	
 	//SE CONFIGURA LA PAGINA DE LA HOJA DEL EXCEL SELECCIONADA
 	public void estiloPagina()
 	{
