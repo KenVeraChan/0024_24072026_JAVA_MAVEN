@@ -42,28 +42,6 @@ class MarcoServidorChat extends JFrame
         this.servidor1= new InterfazServidor();
         add(servidor1);
         setVisible(true);
-        //estableceConexionServidor();
-	}
-	public void estableceConexionServidor()
-	{
-		try {
-			Socket tunelComunicacion= new Socket("192.168.1.136",9999);
-			
-			PaqueteMensaje mensaje= new PaqueteMensaje();
-			
-			mensaje.setMensaje(" online");
-			
-			ObjectOutputStream envioPaquete= new ObjectOutputStream(tunelComunicacion.getOutputStream());
-
-			envioPaquete.writeObject(mensaje);
-			
-		} catch (UnknownHostException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
 	}
 }
 
@@ -106,42 +84,47 @@ class InterfazServidor extends JPanel implements ActionListener,Runnable
 				// Se aceptan todas las comunicaciones que vengan por este tunel
 				Socket entrada= receptor.accept();
 				
-				//DETECCION DE LAS IPS QUE SE CONECTAN AL SERVIDOR
-				InetAddress direccionClientes=entrada.getInetAddress();
-				
-				//Convertir la direccionClientes en formato IP reconocida
-				String IPClienteConectado= direccionClientes.getHostAddress();
-				
-				//Prueba de funcionamiento
-				System.out.println("Direccion remota conectada: "+IPClienteConectado);
-				
 				// Se fijan el flujo de datos de entrada
 				ObjectInputStream flujoDatos= new ObjectInputStream(entrada.getInputStream());
 				
 				//Variable que correspondera la comunicacion recibida
-				try {
 					//ENTRADA: TUNEL, FLUJO DE DATOS Y PAQUETE DE ENTRADA EN EL SERVIDOR
-					paqueteRecibido= (PaqueteMensaje)flujoDatos.readObject();
-					nick=paqueteRecibido.getNick();
-					ip=paqueteRecibido.getIP();
-					mensaje=paqueteRecibido.getMensaje();
-					cajaTexto.append("Se ha conectado "+nick+"\n con su IP: "+ip+"\n y su mensaje: "+mensaje);
-				
-					//SALIDA: TUNEL, FLUJO DE DATOS Y PAQUETE DE SALIDA EN EL SERVIDOR
-					//Se ubica en el area de texto de la ventana del servidor
-					Socket reenvio= new Socket(ip,9090);
-					ObjectOutputStream paqueteReenvio= new ObjectOutputStream(reenvio.getOutputStream());
-					paqueteReenvio.writeObject(paqueteRecibido);
-					paqueteReenvio.flush(); // Buena práctica: asegura el envío de los datos
-					paqueteReenvio.close();  //CIERRA EL FLUJO DE DATOS
-					reenvio.close();  //CIERRA EL SOCKET DE COMUNICACION
+					try {
+						paqueteRecibido= (PaqueteMensaje)flujoDatos.readObject();
+
+						nick=paqueteRecibido.getNick();
+						ip=paqueteRecibido.getIP();
+						mensaje=paqueteRecibido.getMensaje();
+						
+						if(!mensaje.equals("online"))
+						{
+							System.out.println("CONECTADO PERO NO ONLINE");
+							cajaTexto.append("Se ha conectado "+nick+"\n con su IP: "+ip+"\n y su mensaje: "+mensaje);
+							//Si el primer mensaje no es online
+							//SALIDA: TUNEL, FLUJO DE DATOS Y PAQUETE DE SALIDA EN EL SERVIDOR
+							//Se ubica en el area de texto de la ventana del servidor
+							Socket reenvio= new Socket(ip,9090);
+							ObjectOutputStream paqueteReenvio= new ObjectOutputStream(reenvio.getOutputStream());
+							paqueteReenvio.writeObject(paqueteRecibido);
+							paqueteReenvio.flush(); // Buena práctica: asegura el envío de los datos
+							paqueteReenvio.close();  //CIERRA EL FLUJO DE DATOS
+							reenvio.close();  //CIERRA EL SOCKET DE COMUNICACION
+							
+							flujoDatos.close(); //CIERRA EL FLUJO DE DATOS
+							entrada.close(); //CIERRA EL SOCKET DE COMUNICACION
+						}
+						else
+						{
+							System.out.println("CONECTADO ONLINE");
+							InetAddress direccionCliente= entrada.getInetAddress();
+							String ipCliente= direccionCliente.getHostAddress();
+							System.out.println("El cliente con IP: "+ipCliente+" se ha conectado");
+						}
+
 				} catch (ClassNotFoundException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
-					JOptionPane.showInputDialog("CAUSA: "+e.getCause()+"\n ERROR: "+e.getMessage(),"ERROR");
-				}		
-				flujoDatos.close(); //CIERRA EL FLUJO DE DATOS
-				entrada.close(); //CIERRA EL SOCKET DE COMUNICACION
+				}
 			}
 			
 		} catch (IOException e) {

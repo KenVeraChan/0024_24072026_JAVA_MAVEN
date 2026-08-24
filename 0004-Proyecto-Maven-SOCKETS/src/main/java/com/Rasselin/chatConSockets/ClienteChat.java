@@ -10,9 +10,11 @@ import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.UnknownHostException;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -24,7 +26,11 @@ public class ClienteChat
 {
 	public static void main(String[] args)
 	{
-		MarcoClienteChat miMarco= new MarcoClienteChat();
+		String nickNombre="";
+		do {
+		nickNombre= JOptionPane.showInputDialog("Introduzca su nombre para conectar con atención al cliente","IDENTIFÍQUESE");
+		}while(nickNombre==null || nickNombre.equals("") || nickNombre.equals("IDENTIFÍQUESE") || nickNombre.length()<5);
+		MarcoClienteChat miMarco= new MarcoClienteChat(nickNombre);
 	}
 }
 
@@ -34,17 +40,44 @@ class MarcoClienteChat extends JFrame
 	private InterfazCliente cliente1;
 	private int ventanas;
 	
-	public MarcoClienteChat()
-	{
+	public MarcoClienteChat(String nombre)
+	{   //CONSTRUCTOR PRIMERO DE RECEPCIÓN DEL NOMBRE USUARIO
+
         this.icono = new ImageIcon("ficherosUsados/icono.png").getImage();
         setIconImage(icono);        
         setTitle("VENTANA CLIENTE");
-		setBounds(100,150,350,500);
+		setBounds(300,100,350,500);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         
-        this.cliente1= new InterfazCliente();
+        this.cliente1= new InterfazCliente(nombre);
         add(cliente1);
         setVisible(true);
+        
+        estableceConexion();   //Que se ejecute el segundo tunel de conexion mientras se abre el cliente
+	}
+	void estableceConexion()
+	{
+		try {
+			//Estableciendo la conexion
+			Socket tunelComunicacion= new Socket("192.168.1.136",9999);
+
+			//Paquete de datos para enviar IP del seleccionador
+			PaqueteMensaje datosHost= new PaqueteMensaje();
+
+			//Incluye la palabra ONLINE para que el servidor sepa que es un cliente que se conecta y no un mensaje de otro cliente
+			datosHost.setMensaje("online");
+			
+			//Establecimiento de la transmisión de datos
+			ObjectOutputStream flujoSalidaPaquete= new ObjectOutputStream(tunelComunicacion.getOutputStream());
+			flujoSalidaPaquete.writeObject(datosHost);
+			
+		} catch (UnknownHostException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 }
 
@@ -58,19 +91,22 @@ class InterfazCliente extends JPanel implements ActionListener, Runnable
 	private JTextArea cajaTextoRespuesta;
 	
 	private JLabel Titulonick; 
-	private JTextField Cajanick;
+	private JLabel Cajanick;
 	
 	private JLabel TituloIPpersonaConec; 
-	private JTextField CajaIPpersonaConec;
+	private JComboBox<String> CajaIPpersonaConec;
+	private String nombreUsuario="";
 	
-	public InterfazCliente()
+	public InterfazCliente(String nombre)
 	{
+		//SE LE INDICA EL NOMBRE QUE SE LE HABIA ASIGNADO ANTERIORMENTE EN EL JOPTIONPANE
+		this.nombreUsuario=nombre;
 		setLayout(null);  //Para que respeten el setBounds
-		this.Titulonick= new JLabel("NICK CONEXION:");
-		this.Cajanick= new JTextField();
+		this.Titulonick= new JLabel("NICK DE CONEXION:");
+		this.Cajanick= new JLabel(this.nombreUsuario);
 		
 		this.TituloIPpersonaConec= new JLabel("CONECTAR CON:");
-		this.CajaIPpersonaConec= new JTextField();
+		this.CajaIPpersonaConec= new JComboBox();
 		
 		this.cajaEnvio= new JLabel("TEXTO PARA ENVIAR");
 		this.enviarMensaje= new JButton("ENVIAR");
@@ -86,11 +122,11 @@ class InterfazCliente extends JPanel implements ActionListener, Runnable
 		this.cajaRecepcion.setBounds(50,100,120,20);
 		this.cajaTextoRespuesta.setBounds(50,130,200,200);
 		
-		this.Titulonick.setBounds(50,360,200,20);
-		this.Cajanick.setBounds(50,390,100,20);
+		this.Titulonick.setBounds(50,350,200,20);
+		this.Cajanick.setBounds(50,370,200,20);
 		
-		this.TituloIPpersonaConec.setBounds(180,360,200,20);
-		this.CajaIPpersonaConec.setBounds(180,390,100,20);
+		this.TituloIPpersonaConec.setBounds(50,400,200,20);
+		this.CajaIPpersonaConec.setBounds(50,420,200,20);
 		
 		this.enviarMensaje.addActionListener(this);
 		
@@ -103,6 +139,11 @@ class InterfazCliente extends JPanel implements ActionListener, Runnable
 		add(Cajanick);
 		add(TituloIPpersonaConec);
 		add(CajaIPpersonaConec);
+		
+		CajaIPpersonaConec.addItem("Vitrea");
+		CajaIPpersonaConec.addItem("Emiliam");
+		CajaIPpersonaConec.addItem("Rasselin");
+		CajaIPpersonaConec.addItem("Verduliz");
 		
 		//Se crea un hilo sobre el panel
 		Thread hilo= new Thread(this);
@@ -122,7 +163,7 @@ class InterfazCliente extends JPanel implements ActionListener, Runnable
 			    // por la nueva que el sistema operativo posea haciendo CMD----> ipconfig -----> Direccion IPv4
 			
 			PaqueteMensaje mensaje= new PaqueteMensaje();
-			mensaje.setIP(CajaIPpersonaConec.getText());
+			mensaje.setIP(CajaIPpersonaConec.getSelectedItem().toString());   //Devuelve el primer elemento pasado a string
 			mensaje.setNick(Cajanick.getText());
 			mensaje.setMensaje(cajaTexto.getText());
 			
