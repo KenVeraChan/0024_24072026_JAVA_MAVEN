@@ -11,6 +11,7 @@ import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
 
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
@@ -77,6 +78,7 @@ class InterfazServidor extends JPanel implements ActionListener,Runnable
 			ServerSocket receptor= new ServerSocket(9999);
 			PaqueteMensaje paqueteRecibido;
 			String nick,ip,mensaje;
+			ArrayList<String> listaIps= new ArrayList<String>();  //Se creará una unica vez para el registro de las IPS
 			
 			while(true)
 			{
@@ -98,7 +100,6 @@ class InterfazServidor extends JPanel implements ActionListener,Runnable
 						
 						if(!mensaje.equals("online"))
 						{
-							System.out.println("CONECTADO PERO NO ONLINE");
 							cajaTexto.append("Se ha conectado "+nick+"\n con su IP: "+ip+"\n y su mensaje: "+mensaje);
 							//Si el primer mensaje no es online
 							//SALIDA: TUNEL, FLUJO DE DATOS Y PAQUETE DE SALIDA EN EL SERVIDOR
@@ -115,10 +116,27 @@ class InterfazServidor extends JPanel implements ActionListener,Runnable
 						}
 						else
 						{
-							System.out.println("CONECTADO ONLINE");
 							InetAddress direccionCliente= entrada.getInetAddress();
 							String ipCliente= direccionCliente.getHostAddress();
 							System.out.println("El cliente con IP: "+ipCliente+" se ha conectado");
+							listaIps.add(ipCliente);
+							
+							paqueteRecibido.setListaIps(listaIps);
+							
+							for(String IpConectado: listaIps) 
+								{ 
+									System.out.println("El usuario conectado es: "+IpConectado);
+								
+									//Por cada vuelta de bucle le envíe el ARRAYLIST con todos los clientes conectados
+									// Cuantos mas se conecten más paquetes de datos se enviarán
+									// Viaja el Nick, IP, textoMensaje enviado, se envían en un bloque ArrayList
+									Socket reenvio= new Socket(IpConectado,9090);
+									ObjectOutputStream paqueteReenvio= new ObjectOutputStream(reenvio.getOutputStream());
+									paqueteReenvio.writeObject(paqueteRecibido);
+									paqueteReenvio.flush(); // Buena práctica: asegura el envío de los datos
+									paqueteReenvio.close();  //CIERRA EL FLUJO DE DATOS
+									reenvio.close();  //CIERRA EL SOCKET DE COMUNICACION
+								}
 						}
 
 				} catch (ClassNotFoundException e) {

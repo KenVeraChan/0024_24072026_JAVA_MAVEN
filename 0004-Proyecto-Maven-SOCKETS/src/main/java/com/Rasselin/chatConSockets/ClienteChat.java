@@ -11,6 +11,7 @@ import java.io.Serializable;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -140,11 +141,6 @@ class InterfazCliente extends JPanel implements ActionListener, Runnable
 		add(TituloIPpersonaConec);
 		add(CajaIPpersonaConec);
 		
-		CajaIPpersonaConec.addItem("Vitrea");
-		CajaIPpersonaConec.addItem("Emiliam");
-		CajaIPpersonaConec.addItem("Rasselin");
-		CajaIPpersonaConec.addItem("Verduliz");
-		
 		//Se crea un hilo sobre el panel
 		Thread hilo= new Thread(this);
 		hilo.start();
@@ -192,7 +188,34 @@ class InterfazCliente extends JPanel implements ActionListener, Runnable
 				cliente=escuchaCliente.accept();   //Acepta todas las conexiones
 				ObjectInputStream flujoEntrada= new ObjectInputStream(cliente.getInputStream());
 				paqueteRecibido=(PaqueteMensaje)flujoEntrada.readObject();
-				cajaTextoRespuesta.append("\n"+paqueteRecibido.getNick()+"\n"+paqueteRecibido.getMensaje());
+				
+				if(paqueteRecibido.getMensaje().equals("online"))
+				{
+					//SE ACABA DE CONECTAR EL CLIENTE Y DEBE RELLENAR EL COMBOBOX POR CADA CONEXION QUE SE HAYA UNIDO
+					//NO USAR ADDITEM PORQUE LO RELLENARA EN HORIZONTAL
+					ArrayList<String>IpsJCombo= new ArrayList<String>();
+					IpsJCombo=paqueteRecibido.getListaIps();
+					
+					//Antes de proceder con el rellenado hay un detalle que tener en cuenta
+					//Si no se borra lo que ya tiene el JComboBox, el for añadira lo que ya tenía mas el nuevo ArrayList 
+					//Y se verán IPS duplicadas para el primer cliente y no para el segundo, en un primer ciclo
+					// Triplicadas en un primer cliente, duplicadas en un segundo cliente y no para el tercero, en un segundo ciclo
+					//Y así sucesivamente, luego se guardara siempre el ultimo ArrayList generado.
+					
+					CajaIPpersonaConec.removeAllItems();  //Elimina todos los elementos del JComboBox completo
+					
+						for(String IPS: IpsJCombo)
+						{
+							//Rellena el JComboBox por cada usuario que se conecte
+							CajaIPpersonaConec.addItem(IPS);
+						}
+				}
+				else
+				{
+					//EN CASO DE QUE NO SE ACABE DE CONECTAR SINO QUE ES MERA CONVERSACIÓN CON OTRO CLIENTE
+					cajaTextoRespuesta.append("\n"+paqueteRecibido.getNick()+"\n"+paqueteRecibido.getMensaje());
+				}
+				
 				flujoEntrada.close();  //CIERRA EL FLUJO DE DATOS
 				cliente.close();  //CIERRA EL SOCKET DE COMUNICACION
 			}
@@ -211,6 +234,7 @@ class PaqueteMensaje implements Serializable
 	private String IP="";
 	private String mensaje="";
 	private static final long serialVersionUID = 1L;
+	private ArrayList<String> listaIps;
 	
 	public PaqueteMensaje()
 	{
@@ -223,6 +247,14 @@ class PaqueteMensaje implements Serializable
 		this.IP=IP;
 		this.mensaje=mensaje;
 		
+	}
+
+	public ArrayList<String> getListaIps() {
+		return listaIps;
+	}
+
+	public void setListaIps(ArrayList<String> listaIps) {
+		this.listaIps = listaIps;
 	}
 
 	public String getNick() {
