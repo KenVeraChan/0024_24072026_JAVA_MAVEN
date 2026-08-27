@@ -308,6 +308,7 @@ class gestionExamenExcel
 	private int filasPreguntas[];
 	private int numeroLogos=0; //LOGOS IMPUESTOS EN LAS HOJAS DE EXCEL
 	private int modForm=0;   //Modifica la amplitud de la estructura del formulario según la cantidad de preguntas
+	private int numPreguntas=0;
 	
 	//private Date fecha= new Date();   //Fecha de Java util
 	
@@ -842,32 +843,38 @@ class gestionExamenExcel
 					case '1':
 					{
 						this.numeroLogos = 1;   //una copia del logo por cada pagina impresa
+						this.numPreguntas=1;    //Preguntas que se pondrán en el examen
 						break;
 					}
 					case '2':
 					{
 						this.numeroLogos = 2;   //una copia del logo por cada pagina impresa
+						this.numPreguntas=2;    //Preguntas que se pondrán en el examen
 						break;
 					}
 					case '3':
 					{
 						this.numeroLogos = 3;   //una copia del logo por cada pagina impresa
+						this.numPreguntas=3;    //Preguntas que se pondrán en el examen
 						break;
 					}
 					case '4':
 					{
 						this.numeroLogos = 4;   //una copia del logo por cada pagina impresa
+						this.numPreguntas=4;    //Preguntas que se pondrán en el examen
 						break;
 					}
 					case '5':
 					{
 						this.numeroLogos = 5;   //una copia del logo por cada pagina impresa
+						this.numPreguntas=5;    //Preguntas que se pondrán en el examen
 						break;
 					}
 					case 'E':
 					{
 						//AL NO ELEGIR CUANTAS PREGUNTAS SE PONDRÁ UN EXAMEN COMPLETO DE 6 PREGUNTAS
 						this.numeroLogos = 6;
+						this.numPreguntas=6;    //Preguntas que se pondrán en el examen
 						break;
 					}
 					default:
@@ -884,11 +891,25 @@ class gestionExamenExcel
 					case '1','2','3':
 					{
 						this.numeroLogos = 1;   //una copia del logo: primera pagina con 3 preguntas: 1 logo
+						switch(eleccionPreguntas)
+						{
+							case '1':{this.numPreguntas=1;break;}
+							case '2':{this.numPreguntas=2;break;}
+							case '3':{this.numPreguntas=3;break;}
+							default: break;
+						}
 						break;
 					}
 					case '4','5','E':
 					{
 						this.numeroLogos = 2;   //si hay mas preguntas o es examen completo: 2 logos
+						switch(eleccionPreguntas)
+						{
+							case '4':{this.numPreguntas=4;break;}
+							case '5':{this.numPreguntas=5;break;}
+							case 'E':{this.numPreguntas=6;break;}
+							default: break;
+						}
 						break;
 					}
 					default:
@@ -925,7 +946,7 @@ class gestionExamenExcel
 
 	//2) COLOCACION DE UNA IMAGEN ALEATORIA (SIN REPETIR) DEBAJO DE CADA "PREGUNTA 1..6"
 		//Filas donde estan las etiquetas PREGUNTA 1..6 (deben coincidir con preparacionExamenExcel):
-		this.filasPreguntas= new int[this.numeroLogos];
+		this.filasPreguntas= new int[this.numPreguntas];
 		if(examenDibujo)
 		{
 			// PREGUNTA 1->18  (primera cara)

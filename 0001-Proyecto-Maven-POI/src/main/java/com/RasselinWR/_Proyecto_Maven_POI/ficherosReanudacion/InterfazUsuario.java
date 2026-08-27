@@ -319,6 +319,7 @@ class laminaDispuesta extends JPanel implements ActionListener
 			    {
 			    	this.calendario= new Date();   //Aseguramiento de que haya FECHA pase lo que pase
 			    }
+			    this.horarioSeleccionado=(String)this.horario.getSelectedItem();
 			    if(this.horarioSeleccionado== null || this.horarioSeleccionado=="")
 			    {
 			    	this.horarioSeleccionado="16:00"; //Aseguramiento de que haya HORA pase lo que pase
