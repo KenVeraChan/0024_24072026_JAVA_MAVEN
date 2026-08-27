@@ -12,6 +12,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -194,8 +195,12 @@ class InterfazCliente extends JPanel implements ActionListener, Runnable
 					//SE ACABA DE CONECTAR EL CLIENTE Y DEBE RELLENAR EL COMBOBOX POR CADA CONEXION QUE SE HAYA UNIDO
 					//NO USAR ADDITEM PORQUE LO RELLENARA EN HORIZONTAL
 					ArrayList<String>IpsJCombo= new ArrayList<String>();
+					ArrayList<String>NickJCombo= new ArrayList<String>();
 					IpsJCombo=paqueteRecibido.getListaIps();
+					NickJCombo=paqueteRecibido.getListaNicks();
 					
+					HashMap<String,String> NickIP= new HashMap<String,String>();
+					NickIP.put(nombreUsuario, nombreUsuario);
 					//Antes de proceder con el rellenado hay un detalle que tener en cuenta
 					//Si no se borra lo que ya tiene el JComboBox, el for añadira lo que ya tenía mas el nuevo ArrayList 
 					//Y se verán IPS duplicadas para el primer cliente y no para el segundo, en un primer ciclo
@@ -203,11 +208,15 @@ class InterfazCliente extends JPanel implements ActionListener, Runnable
 					//Y así sucesivamente, luego se guardara siempre el ultimo ArrayList generado.
 					
 					CajaIPpersonaConec.removeAllItems();  //Elimina todos los elementos del JComboBox completo
-					
 						for(String IPS: IpsJCombo)
 						{
 							//Rellena el JComboBox por cada usuario que se conecte
 							CajaIPpersonaConec.addItem(IPS);
+						}
+						for(String NICKS: NickJCombo)
+						{
+							//Rellena el JComboBox por cada usuario que se conecte
+							System.out.println(NICKS);
 						}
 				}
 				else
@@ -235,6 +244,7 @@ class PaqueteMensaje implements Serializable
 	private String mensaje="";
 	private static final long serialVersionUID = 1L;
 	private ArrayList<String> listaIps;
+	private ArrayList<String> listaNicks;
 	
 	public PaqueteMensaje()
 	{
@@ -248,11 +258,18 @@ class PaqueteMensaje implements Serializable
 		this.mensaje=mensaje;
 		
 	}
-
+	public ArrayList<String> getListaNicks() {
+		return listaNicks;
+	}
+	
 	public ArrayList<String> getListaIps() {
 		return listaIps;
 	}
-
+	
+	public void setListaNicks(ArrayList<String> listaNicks) {
+		this.listaNicks = listaNicks;
+	}
+	
 	public void setListaIps(ArrayList<String> listaIps) {
 		this.listaIps = listaIps;
 	}

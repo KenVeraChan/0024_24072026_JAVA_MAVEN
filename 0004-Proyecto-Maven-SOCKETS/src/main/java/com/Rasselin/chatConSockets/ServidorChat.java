@@ -79,6 +79,8 @@ class InterfazServidor extends JPanel implements ActionListener,Runnable
 			PaqueteMensaje paqueteRecibido;
 			String nick,ip,mensaje;
 			ArrayList<String> listaIps= new ArrayList<String>();  //Se creará una unica vez para el registro de las IPS
+			ArrayList<String> listaNicks= new ArrayList<String>();
+
 			
 			while(true)
 			{
@@ -118,10 +120,13 @@ class InterfazServidor extends JPanel implements ActionListener,Runnable
 						{
 							InetAddress direccionCliente= entrada.getInetAddress();
 							String ipCliente= direccionCliente.getHostAddress();
-							System.out.println("El cliente con IP: "+ipCliente+" se ha conectado");
+							String NickCliente= direccionCliente.getHostName();
+							System.out.println("El cliente con IP: "+ipCliente+" se ha conectado y su nombre es: "+NickCliente);
 							listaIps.add(ipCliente);
+							listaNicks.add(NickCliente);
 							
 							paqueteRecibido.setListaIps(listaIps);
+							paqueteRecibido.setListaNicks(listaNicks);
 							
 							for(String IpConectado: listaIps) 
 								{ 
@@ -138,13 +143,11 @@ class InterfazServidor extends JPanel implements ActionListener,Runnable
 									reenvio.close();  //CIERRA EL SOCKET DE COMUNICACION
 								}
 						}
-
 				} catch (ClassNotFoundException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 			}
-			
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
