@@ -1,157 +1,234 @@
 package com.Rasselin.chatConSockets;
 
 import java.awt.Image;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.net.UnknownHostException;
 import java.util.ArrayList;
-
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextArea;
 
-public class ServidorChat{
-	public static void main(String[] args)
-	{
-		MarcoServidorChat ventanaServidor= new MarcoServidorChat();
-	}
+// Clase principal: lanza la ventana del servidor
+public class ServidorChat {
+    public static void main(String[] args) {
+        MarcoServidorChat ventanaServidor = new MarcoServidorChat();
+    }
 }
 
-class MarcoServidorChat extends JFrame
-{
-	private Image icono;
-	private InterfazServidor servidor1;
-	
-	public MarcoServidorChat()
-	{
+// Ventana gráfica del servidor
+class MarcoServidorChat extends JFrame {
+    private Image icono;
+    private InterfazServidor servidorPanel;
+
+    public MarcoServidorChat() {
         this.icono = new ImageIcon("ficherosUsados/icono.png").getImage();
-        setIconImage(icono);        
+        setIconImage(icono);
         setTitle("VENTANA SERVIDOR");
-		setBounds(500,150,300,500);
+        setBounds(200, 50, 900, 600);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        
-        this.servidor1= new InterfazServidor();
-        add(servidor1);
+
+        this.servidorPanel = new InterfazServidor();
+        add(servidorPanel);
         setVisible(true);
-	}
+    }
 }
 
-class InterfazServidor extends JPanel implements ActionListener,Runnable
-{
-	private JLabel cajaEnvio;
-	private JTextArea cajaTexto;
-	
-	public InterfazServidor()
-	{
-		setLayout(null);  //Para que respeten el setBounds
-		this.cajaEnvio= new JLabel("TEXTO RECIBIDO");
-		this.cajaTexto= new JTextArea();
-		cajaEnvio.setBounds(50, 50, 120, 20);
-		cajaTexto.setBounds(50, 70, 200, 300);
+// Panel del servidor: muestra texto y lanza el hilo de escucha
+class InterfazServidor extends JPanel implements Runnable {
 
-		add(cajaEnvio);
-		add(cajaTexto);
-		
-        //Creacion de hilo (thread)
-        Thread miHilo= new Thread(this);
-        miHilo.start();
-	}
+    private JLabel etiquetaTexto;
+    private JTextArea areaTexto;
 
-	public void actionPerformed(ActionEvent e) {
-		//Aqui debería gestionarse el envío del mensaje
-		
-	}
-	public void run() 
-	{
-		try {
-			// PUERTO DE ESCUCHA DEL SERVIDOR Y SE DEJA CREADO
-			ServerSocket receptor= new ServerSocket(9999);
-			PaqueteMensaje paqueteRecibido;
-			String nick,ip,mensaje;
-			ArrayList<String> listaIps= new ArrayList<String>();  //Se creará una unica vez para el registro de las IPS
-			ArrayList<String> listaNicks= new ArrayList<String>();
+    // Lista de clientes conectados (cada uno con su socket y streams)
+    private final ArrayList<ClienteConectado> clientesConectados = new ArrayList<>();
 
-			
-			while(true)
-			{
-				//SIEMPRE ESCUCHANDO
-				// Se aceptan todas las comunicaciones que vengan por este tunel
-				Socket entrada= receptor.accept();
-				
-				// Se fijan el flujo de datos de entrada
-				ObjectInputStream flujoDatos= new ObjectInputStream(entrada.getInputStream());
-				
-				//Variable que correspondera la comunicacion recibida
-					//ENTRADA: TUNEL, FLUJO DE DATOS Y PAQUETE DE ENTRADA EN EL SERVIDOR
-					try {
-						paqueteRecibido= (PaqueteMensaje)flujoDatos.readObject();
+    public InterfazServidor() {
+        setLayout(null);
+        this.etiquetaTexto = new JLabel("TEXTO RECIBIDO");
+        this.areaTexto = new JTextArea();
 
-						nick=paqueteRecibido.getNick();
-						ip=paqueteRecibido.getIP();
-						mensaje=paqueteRecibido.getMensaje();
-						
-						if(!mensaje.equals("online"))
-						{
-							cajaTexto.append("Se ha conectado "+nick+"\n con su IP: "+ip+"\n y su mensaje: "+mensaje);
-							//Si el primer mensaje no es online
-							//SALIDA: TUNEL, FLUJO DE DATOS Y PAQUETE DE SALIDA EN EL SERVIDOR
-							//Se ubica en el area de texto de la ventana del servidor
-							Socket reenvio= new Socket(ip,9090);
-							ObjectOutputStream paqueteReenvio= new ObjectOutputStream(reenvio.getOutputStream());
-							paqueteReenvio.writeObject(paqueteRecibido);
-							paqueteReenvio.flush(); // Buena práctica: asegura el envío de los datos
-							paqueteReenvio.close();  //CIERRA EL FLUJO DE DATOS
-							reenvio.close();  //CIERRA EL SOCKET DE COMUNICACION
-							
-							flujoDatos.close(); //CIERRA EL FLUJO DE DATOS
-							entrada.close(); //CIERRA EL SOCKET DE COMUNICACION
-						}
-						else
-						{
-							InetAddress direccionCliente= entrada.getInetAddress();
-							String ipCliente= direccionCliente.getHostAddress();
-							String NickCliente= direccionCliente.getHostName();
-							System.out.println("El cliente con IP: "+ipCliente+" se ha conectado y su nombre es: "+NickCliente);
-							listaIps.add(ipCliente);
-							listaNicks.add(NickCliente);
-							
-							paqueteRecibido.setListaIps(listaIps);
-							paqueteRecibido.setListaNicks(listaNicks);
-							
-							for(String IpConectado: listaIps) 
-								{ 
-									System.out.println("El usuario conectado es: "+IpConectado);
-								
-									//Por cada vuelta de bucle le envíe el ARRAYLIST con todos los clientes conectados
-									// Cuantos mas se conecten más paquetes de datos se enviarán
-									// Viaja el Nick, IP, textoMensaje enviado, se envían en un bloque ArrayList
-									Socket reenvio= new Socket(IpConectado,9090);
-									ObjectOutputStream paqueteReenvio= new ObjectOutputStream(reenvio.getOutputStream());
-									paqueteReenvio.writeObject(paqueteRecibido);
-									paqueteReenvio.flush(); // Buena práctica: asegura el envío de los datos
-									paqueteReenvio.close();  //CIERRA EL FLUJO DE DATOS
-									reenvio.close();  //CIERRA EL SOCKET DE COMUNICACION
-								}
-						}
-				} catch (ClassNotFoundException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-			}
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			JOptionPane.showInputDialog("CAUSA: "+e.getCause()+"\n ERROR: "+e.getMessage(),"ERROR");
-		}
-	}
+        etiquetaTexto.setBounds(50, 50, 120, 20);
+        areaTexto.setBounds(50, 70, 800, 400);
+
+        add(etiquetaTexto);
+        add(areaTexto);
+
+        // Hilo del servidor: acepta conexiones
+        Thread hiloServidor = new Thread(this);
+        hiloServidor.start();
+    }
+
+    @Override
+    public void run() {
+        try {
+            // Servidor escucha en el puerto 9999
+            ServerSocket servidor = new ServerSocket(9999);
+            areaTexto.append("Servidor escuchando en puerto 9999...\n");
+
+            while (true) {
+                // Acepta nueva conexión de cliente
+                Socket socketCliente = servidor.accept();
+
+                // Crea streams para ese cliente
+                ObjectOutputStream salida = new ObjectOutputStream(socketCliente.getOutputStream());
+                ObjectInputStream entrada = new ObjectInputStream(socketCliente.getInputStream());
+
+                // Crea objeto que representa al cliente conectado
+                ClienteConectado cliente = new ClienteConectado(socketCliente, entrada, salida);
+
+                // Lanza un hilo para gestionar a ese cliente
+                Thread hiloCliente = new Thread(new ManejadorCliente(cliente, this));
+                hiloCliente.start();
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            areaTexto.append("ERROR en servidor: " + e.getMessage() + "\n");
+        }
+    }
+
+    // Añade un cliente a la lista de conectados
+    public synchronized void registrarCliente(ClienteConectado cliente) {
+        clientesConectados.add(cliente);
+        areaTexto.append("Cliente registrado: " + cliente.getNick() + " (" + cliente.getIp() + ")\n");
+        actualizarListaClientes();
+    }
+
+    // Elimina un cliente de la lista (por desconexión)
+    public synchronized void eliminarCliente(ClienteConectado cliente) {
+        clientesConectados.remove(cliente);
+        areaTexto.append("Cliente desconectado: " + cliente.getNick() + " (" + cliente.getIp() + ")\n");
+        actualizarListaClientes();
+    }
+
+    // Actualiza la lista de IPs y Nicks y la envía a todos los clientes
+    private synchronized void actualizarListaClientes() {
+        ArrayList<String> listaIps = new ArrayList<>();
+        ArrayList<String> listaNicks = new ArrayList<>();
+
+        for (ClienteConectado c : clientesConectados) {
+            listaIps.add(c.getIp());
+            listaNicks.add(c.getNick());
+        }
+
+        // Crea un paquete de tipo "online" con la lista de clientes
+        PaqueteMensaje paqueteOnline = new PaqueteMensaje();
+        paqueteOnline.setMensaje("online");
+        paqueteOnline.setListaIps(listaIps);
+        paqueteOnline.setListaNicks(listaNicks);
+        paqueteOnline.rellenoHashMap(listaIps, listaNicks);
+
+        // Envía el paquete a todos los clientes conectados
+        broadcast(paqueteOnline);
+    }
+
+    // Envía un paquete a todos los clientes conectados
+    public synchronized void broadcast(PaqueteMensaje paquete) {
+        for (ClienteConectado c : clientesConectados) {
+            try {
+                c.getSalida().writeObject(paquete);
+                c.getSalida().flush();
+            } catch (IOException e) {
+                areaTexto.append("Error enviando a " + c.getNick() + ": " + e.getMessage() + "\n");
+            }
+        }
+    }
+
+    // Muestra un mensaje recibido en el área de texto del servidor
+    public void mostrarMensajeServidor(String texto) {
+        areaTexto.append(texto + "\n");
+    }
+}
+
+// Clase que representa a un cliente conectado al servidor
+class ClienteConectado {
+    private final Socket socket;
+    private final ObjectInputStream entrada;
+    private final ObjectOutputStream salida;
+    private String nick;
+    private String ip;
+
+    public ClienteConectado(Socket socket, ObjectInputStream entrada, ObjectOutputStream salida) {
+        this.socket = socket;
+        this.entrada = entrada;
+        this.salida = salida;
+        this.ip = socket.getInetAddress().getHostAddress();
+        this.nick = "DESCONOCIDO";
+    }
+
+    public Socket getSocket() {
+        return socket;
+    }
+
+    public ObjectInputStream getEntrada() {
+        return entrada;
+    }
+
+    public ObjectOutputStream getSalida() {
+        return salida;
+    }
+
+    public String getNick() {
+        return nick;
+    }
+
+    public void setNick(String nick) {
+        this.nick = nick;
+    }
+
+    public String getIp() {
+        return ip;
+    }
+}
+
+// Hilo que gestiona a un cliente concreto
+class ManejadorCliente implements Runnable {
+
+    private final ClienteConectado cliente;
+    private final InterfazServidor servidorUI;
+
+    public ManejadorCliente(ClienteConectado cliente, InterfazServidor servidorUI) {
+        this.cliente = cliente;
+        this.servidorUI = servidorUI;
+    }
+
+    @Override
+    public void run() {
+        try {
+            while (true) {
+                // Lee un paquete del cliente
+                PaqueteMensaje paquete = (PaqueteMensaje) cliente.getEntrada().readObject();
+
+                // Si el mensaje es "online", es una conexión inicial
+                if ("online".equals(paquete.getMensaje())) {
+                    cliente.setNick(paquete.getNick());
+                    servidorUI.mostrarMensajeServidor(
+                            "Cliente conectado: " + cliente.getNick() + " (" + cliente.getIp() + ")");
+                    servidorUI.registrarCliente(cliente);
+                } else {
+                    // Es un mensaje normal de chat
+                    String texto = "Mensaje de " + paquete.getNick() + " -> " + paquete.getMensaje();
+                    servidorUI.mostrarMensajeServidor(texto);
+
+                    // Reenvía el mensaje a todos los clientes
+                    servidorUI.broadcast(paquete);
+                }
+            }
+        } catch (Exception e) {
+            // Si hay error (desconexión, etc.), se elimina el cliente
+            servidorUI.eliminarCliente(cliente);
+            try {
+                cliente.getEntrada().close();
+                cliente.getSalida().close();
+                cliente.getSocket().close();
+            } catch (IOException ex) {
+                // Ignorar errores de cierre
+            }
+        }
+    }
 }
